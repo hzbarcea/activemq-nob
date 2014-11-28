@@ -1,0 +1,111 @@
+<!-- Copyright (C) 2010 Talend Inc. - www.talend.com -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.apache.activemq.nob</groupId>
+    <artifactId>activemq-nob</artifactId>
+    <version>5.11-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>activemq-nob-supervisor</artifactId>
+  <packaging>jar</packaging>
+  <name>ActiveMQ :: NOB :: Supervisor</name>
+  <description>ActiveMQ Network of Brokers supervisor and configuration server</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.activemq.nob</groupId>
+      <artifactId>activemq-nob-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+      <version>${cxf.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-rs-extension-providers</artifactId>
+      <version>${cxf.version}</version>
+    </dependency>
+    <dependency>
+       <groupId>org.codehaus.jettison</groupId>
+       <artifactId>jettison</artifactId>
+       <version>1.3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
+      <version>2.4.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+    </dependency>
+
+    <!-- logging -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId> 
+      <artifactId>log4j</artifactId> 
+    </dependency>
+
+    <!-- for testing -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-rt-transports-http-jetty</artifactId>
+      <version>${cxf.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <profiles>
+    <profile>
+      <id>server</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>test</phase>
+                <goals>
+                  <goal>java</goal>
+                </goals>
+                <configuration>
+                  <classpathScope>test</classpathScope>
+                  <mainClass>org.apache.activemq.nob.supervisor.SupervisorServer</mainClass>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>
+

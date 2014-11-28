@@ -37,6 +37,7 @@
 
   <modules>
     <module>activemq-nob-api</module>
+    <module>activemq-nob-supervisor</module>
   </modules>
 
 </project>
