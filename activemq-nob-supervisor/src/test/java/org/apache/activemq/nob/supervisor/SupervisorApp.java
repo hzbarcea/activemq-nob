@@ -16,7 +16,7 @@ import org.apache.cxf.jaxrs.provider.json.JSONProvider;
  * runtime about the resources and providers it is supposed to deploy.  See the
  * ApplicationServer class for more information.
  */
-@ApplicationPath("/cc")
+@ApplicationPath("/nob")
 public class SupervisorApp extends Application {
 
 	@Override

@@ -28,6 +28,7 @@ public class SupervisorServer {
         JAXRSServerFactoryBean bean = delegate.createEndpoint(application, JAXRSServerFactoryBean.class);
         bean.setAddress("http://localhost:9000/services" + bean.getAddress());
         bean.setExtensionMappings(mappings);
+        System.out.println("Available at: " + bean.getAddress());
         server = bean.create();
         server.start();
     }
