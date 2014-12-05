@@ -35,7 +35,7 @@ public class SupervisorServer {
     }
 
     public static void main(String args[]) throws Exception {
-        new SupervisorServer(new File("src/test/data"));
+        new SupervisorServer(new File("src/test/resources/nob"));
         System.out.println("Server ready...");
 
         Thread.sleep(125 * 60 * 1000);
