@@ -2,6 +2,7 @@
  */
 package org.apache.activemq.nob.supervisor;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,7 +20,13 @@ import org.apache.cxf.jaxrs.provider.json.JSONProvider;
 @ApplicationPath("/nob")
 public class SupervisorApp extends Application {
 
-	@Override
+    private final File rootFolder;
+
+    public SupervisorApp(File rootFolder) {
+        this.rootFolder = rootFolder;
+    }
+
+    @Override
     public Set<Class<?>> getClasses() {
         return new HashSet<Class<?>>();
     }
@@ -28,7 +35,7 @@ public class SupervisorApp extends Application {
     public Set<Object> getSingletons() {
         Set<Object> classes = new HashSet<Object>();
 
-        SupervisorService supervisor = new SupervisorService();
+        SupervisorService supervisor = new SupervisorService(rootFolder);
         classes.add(supervisor);
 
         // custom providers
@@ -40,4 +47,3 @@ public class SupervisorApp extends Application {
     }
 
 }
-

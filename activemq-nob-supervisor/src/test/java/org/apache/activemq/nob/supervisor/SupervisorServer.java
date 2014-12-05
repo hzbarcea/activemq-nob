@@ -2,6 +2,7 @@
  */
 package org.apache.activemq.nob.supervisor;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,8 +18,8 @@ import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 public class SupervisorServer {
     private static Server server;
 
-    protected SupervisorServer() throws Exception {
-        SupervisorApp application = new SupervisorApp();
+    protected SupervisorServer(File rootFolder) throws Exception {
+        SupervisorApp application = new SupervisorApp(rootFolder);
         RuntimeDelegate delegate = RuntimeDelegate.getInstance();
 
         Map<Object, Object> mappings = new HashMap<Object, Object>();
@@ -26,7 +27,7 @@ public class SupervisorServer {
         mappings.put("xml", "application/xml");
         
         JAXRSServerFactoryBean bean = delegate.createEndpoint(application, JAXRSServerFactoryBean.class);
-        bean.setAddress("http://localhost:9000/services" + bean.getAddress());
+        bean.setAddress("http://0.0.0.0:9000/services" + bean.getAddress());
         bean.setExtensionMappings(mappings);
         System.out.println("Available at: " + bean.getAddress());
         server = bean.create();
@@ -34,7 +35,7 @@ public class SupervisorServer {
     }
 
     public static void main(String args[]) throws Exception {
-        new SupervisorServer();
+        new SupervisorServer(new File("src/test/data"));
         System.out.println("Server ready...");
 
         Thread.sleep(125 * 60 * 1000);

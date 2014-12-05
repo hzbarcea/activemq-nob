@@ -2,10 +2,8 @@
  */
 package org.apache.activemq.nob.supervisor;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.File;
+import java.io.FileFilter;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -14,59 +12,79 @@ import org.apache.activemq.nob.api.Broker;
 import org.apache.activemq.nob.api.Brokers;
 import org.apache.activemq.nob.api.Supervisor;
 
-
 /**
  * JAX-RS ControlCenter root resource
  */
 public class SupervisorService implements Supervisor {
-    private static String DEFAULT_BROKER_CONFIG = "";
-    static {
-        InputStream is = Supervisor.class.getResourceAsStream("/META-INF/activemq-default.xml");
-        if (is != null) {
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            StringBuffer content = new StringBuffer();
-            String line = null;
-            try {
-				while ((line = br.readLine()) != null) {
-				    content.append(line);
-				}
-	            br.close();
-	            DEFAULT_BROKER_CONFIG = content.toString();
-			} catch (IOException e) {
-				// ignore
-			}
+
+    /**
+     * Folder where the broker config structure is.
+     */
+    private final File rootFolder;
+    private Brokers brokers;
+
+    public SupervisorService(File rootFolder) {
+        this.rootFolder = rootFolder;
+        updateBrokerList();
+    }
+
+    private void updateBrokerList() {
+        File[] brokerFolders = rootFolder.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                File configFile = new File(file.getPath() + File.separatorChar + "activemq.xml");
+                return file.isDirectory() && configFile.exists();
+            }
+        });
+
+        brokers = new Brokers();
+        for (File brokerFolder : brokerFolders) {
+            Broker broker = new Broker();
+            broker.setName(brokerFolder.getName());
+            brokers.getBrokers().add(broker);
         }
     }
 
+    @Override
     public Brokers showBrokers() {
-		Broker broker;
-		Brokers answer = new Brokers();
+        return brokers;
+    }
 
-		broker = new Broker();
-		answer.getBrokers().add(broker);
-		broker = new Broker();
-		answer.getBrokers().add(broker);
+    @Override
+    public Broker showBroker(String brokerid) {
+        for (Broker broker : brokers.getBrokers()) {
+            if (broker.getName().equals(brokerid)) {
+                return broker;
+            }
+        }
+        return null;
+    }
 
-		return answer;
-	}
+    @Override
+    public void updateBroker(String brokerid, Broker brokertype) {
+        throw new UnsupportedOperationException("not yet implemented");
+    }
 
-	public Broker showBroker(String brokerid) {
-		Broker answer = new Broker();
-		return answer;
-	}
+    @Override
+    public void deleteBroker(String brokerid) {
+        throw new UnsupportedOperationException("not yet implemented");
+    }
 
-	public void updateBroker(String brokerid, Broker brokertype) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public Response getBrokerConfig(String brokerid) {
+        File configFile = new File(getBrokerFolder(brokerid) + File.separatorChar + "activemq.xml");
+        if (configFile.exists()) {
+            return Response.status(200)
+                    .type(MediaType.APPLICATION_XML)
+                    .entity(configFile)
+                    .build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+    }
 
-	public void deleteBroker(String brokerid) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public Response getBrokerConfig(String brokerid) {
-	    return Response.status(200).type(MediaType.APPLICATION_XML).entity(DEFAULT_BROKER_CONFIG).build();
-	}
+    private String getBrokerFolder(String brokerid) {
+        return rootFolder.getPath() + File.separatorChar + brokerid;
+    }
 
 }
