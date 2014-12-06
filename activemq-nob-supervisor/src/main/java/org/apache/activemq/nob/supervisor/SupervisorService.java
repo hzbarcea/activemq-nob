@@ -20,20 +20,26 @@ public class SupervisorService implements Supervisor {
     /**
      * Folder where the broker config structure is.
      */
-    private final File rootFolder;
+    private File nobHome;
     private Brokers brokers;
 
-    public SupervisorService(File rootFolder) {
-        this.rootFolder = rootFolder;
-        updateBrokerList();
+    public SupervisorService(String location) {
+    	File home = new File(location);
+        if (home.exists()) {
+        	nobHome = home;
+            updateBrokerList();
+        }
     }
 
     private void updateBrokerList() {
-        File[] brokerFolders = rootFolder.listFiles(new FileFilter() {
+        File[] brokerFolders = nobHome.listFiles(new FileFilter() {
             @Override
             public boolean accept(File file) {
-                File configFile = new File(file.getPath() + File.separatorChar + "activemq.xml");
-                return file.isDirectory() && configFile.exists();
+            	// Only accept if both configuration and metadata files are present
+            	// This may still be insufficient, as metadata could be incorrect
+                return file.isDirectory() 
+                    && new File(file, "activemq.xml").exists()
+                    && new File(file, file.getName() + ".properties").exists();
             }
         });
 
@@ -46,12 +52,12 @@ public class SupervisorService implements Supervisor {
     }
 
     @Override
-    public Brokers showBrokers() {
+    public Brokers getBrokers() {
         return brokers;
     }
 
     @Override
-    public Broker showBroker(String brokerid) {
+	public Broker getBroker(String brokerid) {
         for (Broker broker : brokers.getBrokers()) {
             if (broker.getName().equals(brokerid)) {
                 return broker;
@@ -72,19 +78,16 @@ public class SupervisorService implements Supervisor {
 
     @Override
     public Response getBrokerConfig(String brokerid) {
-        File configFile = new File(getBrokerFolder(brokerid) + File.separatorChar + "activemq.xml");
-        if (configFile.exists()) {
-            return Response.status(200)
-                    .type(MediaType.APPLICATION_XML)
-                    .entity(configFile)
-                    .build();
-        } else {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
+    	File path = getBrokerConfigPath(brokerid);
+        File configFile = path != null ? new File(path, "activemq.xml") : null;
+        return (configFile != null && configFile.exists()) ?
+            Response.ok().type(MediaType.APPLICATION_XML).entity(configFile).build() :
+            Response.status(Response.Status.NOT_FOUND).build();
     }
 
-    private String getBrokerFolder(String brokerid) {
-        return rootFolder.getPath() + File.separatorChar + brokerid;
+    private File getBrokerConfigPath(String brokerid) {
+    	File path = new File(nobHome, brokerid);
+    	return path.exists() ? path : null;
     }
 
 }

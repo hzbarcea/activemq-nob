@@ -20,10 +20,10 @@ import org.apache.cxf.jaxrs.provider.json.JSONProvider;
 @ApplicationPath("/nob")
 public class SupervisorApp extends Application {
 
-    private final File rootFolder;
+    private final String nobHome;
 
-    public SupervisorApp(File rootFolder) {
-        this.rootFolder = rootFolder;
+    public SupervisorApp(String location) {
+        nobHome = location;
     }
 
     @Override
@@ -35,7 +35,7 @@ public class SupervisorApp extends Application {
     public Set<Object> getSingletons() {
         Set<Object> classes = new HashSet<Object>();
 
-        SupervisorService supervisor = new SupervisorService(rootFolder);
+        SupervisorService supervisor = new SupervisorService(nobHome);
         classes.add(supervisor);
 
         // custom providers

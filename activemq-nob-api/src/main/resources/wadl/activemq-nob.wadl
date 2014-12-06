@@ -28,7 +28,7 @@
   <resources base="http://localhost:8080/">
     <resource path="/" id="{api.nob.activemq.apache.org}Supervisor">
       <resource path="brokers">
-        <method name="GET" id="showBrokers">
+        <method name="GET" id="getBrokers">
           <response>
             <representation mediaType="application/*+json" name="nob:brokers" />
             <representation mediaType="application/json" element="nob:brokers" />
@@ -40,7 +40,7 @@
       <resource path="broker/{brokerid}">
         <param name="brokerid" style="template" type="xs:string"/>
 
-        <method name="GET" id="showBroker">
+        <method name="GET" id="getBroker">
           <response>
             <representation mediaType="application/*+json" element="nob:broker" />
             <representation mediaType="application/json" element="nob:broker" />

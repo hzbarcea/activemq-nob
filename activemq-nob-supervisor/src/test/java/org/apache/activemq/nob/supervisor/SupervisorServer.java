@@ -18,8 +18,8 @@ import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 public class SupervisorServer {
     private static Server server;
 
-    protected SupervisorServer(File rootFolder) throws Exception {
-        SupervisorApp application = new SupervisorApp(rootFolder);
+    protected SupervisorServer(String location) throws Exception {
+        SupervisorApp application = new SupervisorApp(location);
         RuntimeDelegate delegate = RuntimeDelegate.getInstance();
 
         Map<Object, Object> mappings = new HashMap<Object, Object>();
@@ -35,7 +35,7 @@ public class SupervisorServer {
     }
 
     public static void main(String args[]) throws Exception {
-        new SupervisorServer(new File("src/test/resources/nob"));
+        new SupervisorServer("src/test/resources/nob");
         System.out.println("Server ready...");
 
         Thread.sleep(125 * 60 * 1000);
