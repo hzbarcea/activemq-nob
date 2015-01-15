@@ -4,6 +4,7 @@ package org.apache.activemq.nob.supervisor;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.UUID;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -50,6 +51,13 @@ public class SupervisorService implements Supervisor {
             brokers.getBrokers().add(broker);
         }
     }
+
+	public Response createBroker() {
+        Broker broker = new Broker();
+        broker.setName(UUID.randomUUID().toString());
+        brokers.getBrokers().add(broker);
+		return Response.ok().type(MediaType.APPLICATION_XML).entity(broker.getName()).build();
+	}
 
     @Override
     public Brokers getBrokers() {
