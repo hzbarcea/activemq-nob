@@ -12,44 +12,43 @@ import javax.ws.rs.core.Response;
 import org.apache.activemq.nob.api.Broker;
 import org.apache.activemq.nob.api.Brokers;
 import org.apache.activemq.nob.api.Supervisor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * JAX-RS ControlCenter root resource
  */
 public class SupervisorService implements Supervisor {
+	 private static final Logger LOG = LoggerFactory.getLogger(SupervisorService.class);
+;
 
     /**
      * Folder where the broker config structure is.
      */
-    private File nobHome;
+    private File location;
     private Brokers brokers;
 
-    public SupervisorService(String location) {
-    	File home = new File(location);
-        if (home.exists()) {
-        	nobHome = home;
-            updateBrokerList();
-        }
+    public SupervisorService() {
     }
 
-    private void updateBrokerList() {
-        File[] brokerFolders = nobHome.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-            	// Only accept if both configuration and metadata files are present
-            	// This may still be insufficient, as metadata could be incorrect
-                return file.isDirectory() 
-                    && new File(file, "activemq.xml").exists()
-                    && new File(file, file.getName() + ".properties").exists();
-            }
-        });
+    public File getLocation() {
+    	return location;
+    }
 
-        brokers = new Brokers();
-        for (File brokerFolder : brokerFolders) {
-            Broker broker = new Broker();
-            broker.setName(brokerFolder.getName());
-            brokers.getBrokers().add(broker);
-        }
+    public void setLocation(File location) {
+    	this.location = location;
+    }
+
+    public void init() throws RuntimeException {
+    	if (location == null) {
+    		location = getDataLocation();
+    		if (location == null) {
+    			throw new RuntimeException("Cannot access NOB data");
+    		}
+    	}
+    	LOG.info("Using NOB data at {}", location.getAbsolutePath());
+    	refreshData();
     }
 
 	public Response createBroker() {
@@ -59,8 +58,7 @@ public class SupervisorService implements Supervisor {
 		return Response.ok().type(MediaType.APPLICATION_XML).entity(broker.getName()).build();
 	}
 
-    @Override
-    public Brokers getBrokers() {
+    public Brokers getBrokers(String filter) {
         return brokers;
     }
 
@@ -74,28 +72,90 @@ public class SupervisorService implements Supervisor {
         return null;
     }
 
-    @Override
     public void updateBroker(String brokerid, Broker brokertype) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
-    @Override
     public void deleteBroker(String brokerid) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
-    @Override
-    public Response getBrokerConfig(String brokerid) {
-    	File path = getBrokerConfigPath(brokerid);
-        File configFile = path != null ? new File(path, "activemq.xml") : null;
-        return (configFile != null && configFile.exists()) ?
-            Response.ok().type(MediaType.APPLICATION_XML).entity(configFile).build() :
+    public Response getBrokerXbeanConfig(String brokerid) {
+        File xbeanFile = getBrokerXbeanFile(brokerid);
+        return (xbeanFile != null) ?
+            Response.ok().type(MediaType.APPLICATION_XML).entity(xbeanFile).build() :
             Response.status(Response.Status.NOT_FOUND).build();
+            // TODO: add lastUpdated header !
     }
 
-    private File getBrokerConfigPath(String brokerid) {
-    	File path = new File(nobHome, brokerid);
-    	return path.exists() ? path : null;
+	public Response getBrokerStatus(String brokerid) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+    public static File getDataLocation() {
+    	File dataLocation;
+    	String envData = System.getenv("NOB_DATA");
+    	if (envData == null) {
+    		System.getProperty("user.home");
+    		dataLocation = new File(new File(System.getProperty("user.home")), ".nob");
+    		if (!dataLocation.exists()) {
+    			dataLocation = new File(new File("."), ".nob");
+    		}
+    	} else {
+    		dataLocation = new File(envData);
+    	}
+        if (!dataLocation.exists()) {
+        	dataLocation.mkdirs();
+        };
+        
+        if (!dataLocation.isDirectory()) {
+        	LOG.error("Cannot create data directory {}", dataLocation.getAbsolutePath());
+        	return null;
+        }
+        return dataLocation;
+    }
+
+
+    public static UUID fileToUuid(String name) {
+    	try {
+        	return UUID.fromString(name);
+    	} catch (IllegalArgumentException e) {
+    		// filename does not confirm with convention; ignore
+    	}
+    	return null;
+    }
+
+    private void refreshData() {
+        File[] brokerDefinitions = location.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+            	// Only accept if both configuration and metadata files are present
+            	// This may still be insufficient, as metadata could be incorrect
+            	String filename = file.getName();
+                return !file.isDirectory() 
+                    &&  fileToUuid(filename) != null
+                    &&  getBrokerXbeanFile(filename) != null;
+            }
+        });
+
+        brokers = new Brokers();
+        for (File def : brokerDefinitions) {
+            Broker broker = new Broker();
+            broker.setName(def.getName());
+            brokers.getBrokers().add(broker);
+        }
+    }
+
+	private File getBrokerMetadataFile(String brokerid) {
+    	File path = new File(location, brokerid);
+    	return path.exists() && !path.isDirectory() ? path : null;
+    }
+
+	private File getBrokerXbeanFile(String brokerid) {
+    	File path = new File(location, brokerid + "-xbean.xml");
+    	return path.exists() && !path.isDirectory() ? path : null;
     }
 
 }

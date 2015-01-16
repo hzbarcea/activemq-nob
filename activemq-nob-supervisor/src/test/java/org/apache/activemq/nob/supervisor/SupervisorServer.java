@@ -18,8 +18,8 @@ import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 public class SupervisorServer {
     private static Server server;
 
-    protected SupervisorServer(String location) throws Exception {
-        SupervisorApp application = new SupervisorApp(location);
+    protected SupervisorServer() throws Exception {
+        SupervisorApp application = new SupervisorApp();
         RuntimeDelegate delegate = RuntimeDelegate.getInstance();
 
         Map<Object, Object> mappings = new HashMap<Object, Object>();
@@ -27,15 +27,15 @@ public class SupervisorServer {
         mappings.put("xml", "application/xml");
         
         JAXRSServerFactoryBean bean = delegate.createEndpoint(application, JAXRSServerFactoryBean.class);
-        bean.setAddress("http://0.0.0.0:9000/services" + bean.getAddress());
+        bean.setAddress("http://0.0.0.0:9000" + bean.getAddress());
         bean.setExtensionMappings(mappings);
-        System.out.println("Available at: " + bean.getAddress());
+        System.out.println("REST service address: " + bean.getAddress());
         server = bean.create();
         server.start();
     }
 
     public static void main(String args[]) throws Exception {
-        new SupervisorServer("src/test/resources/nob");
+        new SupervisorServer();
         System.out.println("Server ready...");
 
         Thread.sleep(125 * 60 * 1000);
