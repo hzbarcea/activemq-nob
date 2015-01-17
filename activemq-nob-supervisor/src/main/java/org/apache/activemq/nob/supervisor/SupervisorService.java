@@ -9,8 +9,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -26,14 +28,11 @@ import org.slf4j.LoggerFactory;
  * JAX-RS ControlCenter root resource
  */
 public class SupervisorService implements Supervisor {
-     private static final Logger LOG = LoggerFactory.getLogger(SupervisorService.class);
-;
+    private static final Logger LOG = LoggerFactory.getLogger(SupervisorService.class);
 
-    /**
-     * Folder where the broker config structure is.
-     */
-    private File location;
-    private Brokers brokers;
+    private File location; // Broker data store; TODO: create an abstraction for storage
+    private Map<String, Broker> brokers = new ConcurrentHashMap<String, Broker>();
+    private Map<String, String> aliases = new ConcurrentHashMap<String, String>();
 
     public SupervisorService() {
     }
@@ -58,25 +57,23 @@ public class SupervisorService implements Supervisor {
     }
 
     public Response createBroker() {
-        Broker broker = new Broker();
-        broker.setName(UUID.randomUUID().toString());
+        Broker broker = createBroker(UUID.randomUUID());
         storeBrokerMetadata(broker);
-        brokers.getBrokers().add(broker);
+        // by default id == name, no impact on aliases
+        brokers.put(broker.getId(), broker);
         return Response.ok().type(MediaType.APPLICATION_XML).entity(broker.getName()).build();
     }
 
     public Brokers getBrokers(String filter) {
-        return brokers;
+        Brokers result = new Brokers();
+        // TODO: deal with the filter
+        result.getBrokers().addAll(brokers.values());
+        return result;
     }
 
     @Override
     public Broker getBroker(String brokerid) {
-        for (Broker broker : brokers.getBrokers()) {
-            if (broker.getName().equals(brokerid)) {
-                return broker;
-            }
-        }
-        return null;
+        return brokers.get(brokerid);
     }
 
     public void updateBroker(String brokerid, Broker brokertype) {
@@ -101,37 +98,13 @@ public class SupervisorService implements Supervisor {
     }
 
 
-    public static File getDataLocation() {
-        File dataLocation;
-        String envData = System.getenv("NOB_DATA");
-        if (envData == null) {
-            System.getProperty("user.home");
-            dataLocation = new File(new File(System.getProperty("user.home")), ".nob");
-            if (!dataLocation.exists()) {
-                dataLocation = new File(new File("."), ".nob");
-            }
-        } else {
-            dataLocation = new File(envData);
-        }
-        if (!dataLocation.exists()) {
-            dataLocation.mkdirs();
-        };
-        
-        if (!dataLocation.isDirectory()) {
-            LOG.error("Cannot create data directory {}", dataLocation.getAbsolutePath());
-            return null;
-        }
-        return dataLocation;
-    }
-
-
-    public static UUID fileToUuid(String name) {
-        try {
-            return UUID.fromString(name);
-        } catch (IllegalArgumentException e) {
-            // filename does not confirm with convention; ignore
-        }
-        return null;
+    private Broker createBroker(UUID uuid) {
+        String id = uuid.toString();
+        Broker broker = new Broker();
+        broker.setId(id);
+        broker.setName(id);
+        broker.setStatus(SupervisorConstants.STATUS_NEW);
+        return broker;
     }
 
     private void refreshData() {
@@ -147,7 +120,7 @@ public class SupervisorService implements Supervisor {
             }
         });
 
-        brokers = new Brokers();
+        brokers.clear();
         for (File def : brokerDefinitions) {
             Broker broker = loadBrokerMetadata(def);
             if (broker == null) {
@@ -155,7 +128,16 @@ public class SupervisorService implements Supervisor {
                 continue;
             }
 
-            brokers.getBrokers().add(broker);
+            String id = broker.getId();
+            Broker old = brokers.put(id, broker);
+            if (!id.equals(broker.getName())) {
+                aliases.put(broker.getName(), id);
+            }
+            if (old != null) {
+                // We avoided synchronizing using a ConcurrentHashMap, but
+                // if we replaced an existing value, there is a logic failure somewhere
+                LOG.warn("NOB - broker {} already exists. Data may be corrupted.");
+            }
         }
     }
 
@@ -200,6 +182,39 @@ public class SupervisorService implements Supervisor {
             p.store(out, "# Broker definition for " + broker.getName());
         } catch (IOException e) {
         }
+    }
+
+
+    public static UUID fileToUuid(String name) {
+        try {
+            return UUID.fromString(name);
+        } catch (IllegalArgumentException e) {
+            // filename does not confirm with convention; ignore
+        }
+        return null;
+    }
+
+    public static File getDataLocation() {
+        File dataLocation;
+        String envData = System.getenv("NOB_DATA");
+        if (envData == null) {
+            System.getProperty("user.home");
+            dataLocation = new File(new File(System.getProperty("user.home")), ".nob");
+            if (!dataLocation.exists()) {
+                dataLocation = new File(new File("."), ".nob");
+            }
+        } else {
+            dataLocation = new File(envData);
+        }
+        if (!dataLocation.exists()) {
+            dataLocation.mkdirs();
+        };
+
+        if (!dataLocation.isDirectory()) {
+            LOG.error("Cannot create data directory {}", dataLocation.getAbsolutePath());
+            return null;
+        }
+        return dataLocation;
     }
 
 }

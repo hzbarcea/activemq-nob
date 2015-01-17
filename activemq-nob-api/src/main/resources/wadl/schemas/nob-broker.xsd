@@ -32,8 +32,9 @@
   <xs:element name="broker" type="tns:brokerType" />
   <xs:complexType name="brokerType">
     <xs:sequence>
+      <xs:element name="id" type="xs:string" />
       <xs:element name="name" type="xs:string" />
-      <xs:element name="region" type="xs:string" />
+      <xs:element name="status" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
 
