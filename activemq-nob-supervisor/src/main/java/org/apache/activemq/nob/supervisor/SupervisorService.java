@@ -81,7 +81,11 @@ public class SupervisorService implements Supervisor {
     }
 
     public void deleteBroker(String brokerid) {
-        throw new UnsupportedOperationException("not yet implemented");
+        brokers.remove(brokerid);
+
+        // Now remove files associated with the broker removed...
+        deleteBrokerDataFile(getBrokerMetadataFile(brokerid));
+        deleteBrokerDataFile(getBrokerXbeanFile(brokerid));
     }
 
     public Response getBrokerXbeanConfig(String brokerid) {
@@ -93,8 +97,10 @@ public class SupervisorService implements Supervisor {
     }
 
     public Response getBrokerStatus(String brokerid) {
-        // TODO Auto-generated method stub
-        return null;
+        Broker broker = brokers.get(brokerid);
+        return broker != null ?
+            Response.ok().type(MediaType.TEXT_PLAIN).entity(broker.getStatus()).build() :
+            Response.status(Response.Status.NOT_FOUND).build();
     }
 
 
@@ -149,6 +155,13 @@ public class SupervisorService implements Supervisor {
     private File getBrokerXbeanFile(String brokerid) {
         File path = new File(location, brokerid + "-xbean.xml");
         return path.exists() && !path.isDirectory() ? path : null;
+    }
+
+    private void deleteBrokerDataFile(File data) {
+        if (data != null) {
+            LOG.info("Deleting broker data: {}", data.getName());
+            data.delete();
+        }
     }
 
     private Broker loadBrokerMetadata(File metadata) {
