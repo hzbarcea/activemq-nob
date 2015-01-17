@@ -175,7 +175,9 @@ public class SupervisorService implements Supervisor {
         }
 
         Broker broker = new Broker();
-        broker.setName(p.getProperty("id"));
+        broker.setId(p.getProperty("id"));
+        broker.setName(p.getProperty("name"));
+        broker.setStatus(p.getProperty("status"));
         if (!metadata.getName().equals(broker.getName())) {
             LOG.warn("Broker definition error in {}. Mismatched id={}. ", metadata.getName(), broker.getName());
             return null;
@@ -188,6 +190,7 @@ public class SupervisorService implements Supervisor {
         Properties p = new Properties();
         p.setProperty("id", broker.getName());
         p.setProperty("name", broker.getName());
+        p.setProperty("status", broker.getStatus());
 
         OutputStream out;
         try {
