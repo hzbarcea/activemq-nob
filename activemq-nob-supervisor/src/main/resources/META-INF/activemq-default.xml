@@ -25,29 +25,13 @@
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
        http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
 
-  <bean id="defaultZoner" class="org.example.activemq.zones.impl.DefaultZonesManager" />
-
-  <amq:broker brokerName="activemq" useJmx="true" persistent="false">
+  <amq:broker brokerName="$brokerName" useJmx="true" persistent="false">
     <amq:managementContext>
-      <amq:managementContext createConnector="true" connectorPort="1099" jmxDomainName="org.example.activemq" />
+      <amq:managementContext createConnector="true" connectorPort="1099" jmxDomainName="org.apache.activemq.nob" />
     </amq:managementContext>
 
-    <amq:transportConnectors>
-      <amq:transportConnector name="default" uri="tcp://0.0.0.0:61616"/>
-    </amq:transportConnectors>
-
     <amq:plugins>
-      <!-- amq:runtimeConfigurationPlugin checkPeriod="10000" / -->
-
-      <amq:simpleAuthenticationPlugin anonymousAccessAllowed="true">
-        <amq:users>
-          <amq:authenticationUser username="system@US" password="password" groups="users,admins" />
-          <amq:authenticationUser username="system@EU" password="password" groups="users,admins" />
-          <amq:authenticationUser username="user@US" password="password" groups="users" />
-          <amq:authenticationUser username="guest@US" password="password" groups="guests" />
-        </amq:users>
-      </amq:simpleAuthenticationPlugin>
-
+      <amq:runtimeConfigurationPlugin checkPeriod="30000" />
     </amq:plugins>
   </amq:broker>
 

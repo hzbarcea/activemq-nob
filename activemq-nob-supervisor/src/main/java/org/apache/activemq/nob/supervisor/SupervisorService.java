@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Map;
 import java.util.Properties;
@@ -22,6 +23,8 @@ import org.apache.activemq.nob.api.Brokers;
 import org.apache.activemq.nob.api.Supervisor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.io.CharStreams;
 
 
 /**
@@ -59,8 +62,9 @@ public class SupervisorService implements Supervisor {
     public Response createBroker() {
         Broker broker = createBroker(UUID.randomUUID());
         storeBrokerMetadata(broker);
-        // by default id == name, no impact on aliases
+        storeBrokerXbean(broker, generateBrokerXbean(broker));
         brokers.put(broker.getId(), broker);
+        // no need to add the default name to aliases
         return Response.ok().type(MediaType.APPLICATION_XML).entity(broker.getName()).build();
     }
 
@@ -149,16 +153,16 @@ public class SupervisorService implements Supervisor {
 
     private File getBrokerMetadataFile(String brokerid) {
         File path = new File(location, brokerid);
-        return path.exists() && !path.isDirectory() ? path : null;
+        return path.exists() && path.isDirectory() ? null : path;
     }
 
     private File getBrokerXbeanFile(String brokerid) {
         File path = new File(location, brokerid + "-xbean.xml");
-        return path.exists() && !path.isDirectory() ? path : null;
+        return path.exists() && path.isDirectory() ? null : path;
     }
 
     private void deleteBrokerDataFile(File data) {
-        if (data != null) {
+        if (data != null && data.exists()) {
             LOG.info("Deleting broker data: {}", data.getName());
             data.delete();
         }
@@ -192,14 +196,28 @@ public class SupervisorService implements Supervisor {
         p.setProperty("name", broker.getName());
         p.setProperty("status", broker.getStatus());
 
+        try {
+            OutputStream out = new FileOutputStream(getBrokerMetadataFile(broker.getName()));
+            p.store(out, "# Broker definition for " + broker.getName());
+        } catch (IOException e) {
+            LOG.info("Failed to store broker metadata for '{}': {}", broker.getName(), e.getMessage());
+        }
+    }
+
+    private void storeBrokerXbean(Broker broker, String xbean) {
         OutputStream out;
         try {
-            out = new FileOutputStream(getBrokerMetadataFile(broker.getName()));
-            p.store(out, "# Broker definition for " + broker.getName());
+            out = new FileOutputStream(getBrokerXbeanFile(broker.getName()));
+            out.write(xbean.getBytes());
+            out.close();
         } catch (IOException e) {
         }
     }
 
+    private String generateBrokerXbean(Broker broker) {
+        String xbean = getXbeanConfigurationTemplate();
+        return xbean.replaceAll("\\$brokerName", broker.getName());
+    }
 
     public static UUID fileToUuid(String name) {
         try {
@@ -231,6 +249,17 @@ public class SupervisorService implements Supervisor {
             return null;
         }
         return dataLocation;
+    }
+
+    public static final String getXbeanConfigurationTemplate() {
+        try (
+		    final InputStream xbean = SupervisorService.class.getResourceAsStream( "/META-INF/activemq-default.xml" );
+			final InputStreamReader in = new InputStreamReader(xbean)) {
+		    return CharStreams.toString(in);
+		} catch (IOException e) {
+			LOG.error("Could not read the default xbean configuration template");
+		}
+        return null;
     }
 
 }

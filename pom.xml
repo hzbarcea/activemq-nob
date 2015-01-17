@@ -33,6 +33,7 @@
 
   <properties>
     <cxf.version>3.0.1</cxf.version>
+    <guava.version>18.0</guava.version>
   </properties>
 
   <modules>
