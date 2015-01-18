@@ -2,7 +2,6 @@
  */
 package org.apache.activemq.nob.supervisor;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 

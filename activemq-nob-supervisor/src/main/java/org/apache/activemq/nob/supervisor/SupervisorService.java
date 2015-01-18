@@ -10,6 +10,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
@@ -17,6 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.activemq.nob.api.Broker;
 import org.apache.activemq.nob.api.Brokers;
@@ -61,8 +68,9 @@ public class SupervisorService implements Supervisor {
 
     public Response createBroker() {
         Broker broker = createBroker(UUID.randomUUID());
-        storeBrokerMetadata(broker);
         storeBrokerXbean(broker, generateBrokerXbean(broker));
+        // storeBrokerMetadata(broker); is already done by storeBrokerXbean above; needs some refactoring
+        //  setting metadata should probably automatically trigger persistent storage of value
         brokers.put(broker.getId(), broker);
         // no need to add the default name to aliases
         return Response.ok().type(MediaType.APPLICATION_XML).entity(broker.getName()).build();
@@ -93,9 +101,14 @@ public class SupervisorService implements Supervisor {
     }
 
     public Response getBrokerXbeanConfig(String brokerid) {
+        Broker broker = brokers.get(brokerid);
+
         File xbeanFile = getBrokerXbeanFile(brokerid);
         return (xbeanFile != null) ?
-            Response.ok().type(MediaType.APPLICATION_XML).entity(xbeanFile).build() :
+            Response.ok()
+                .type(MediaType.APPLICATION_XML)
+                .entity(xbeanFile)
+                .lastModified(xmlGregorianToDate(broker.getLastModifiedXbean())).build() :
             Response.status(Response.Status.NOT_FOUND).build();
             // TODO: add lastUpdated header !
     }
@@ -182,6 +195,8 @@ public class SupervisorService implements Supervisor {
         broker.setId(p.getProperty("id"));
         broker.setName(p.getProperty("name"));
         broker.setStatus(p.getProperty("status"));
+        broker.setLastModifiedXbean(dateToXmlGregorian(stringToDate(p.getProperty("lastModified"))));
+
         if (!metadata.getName().equals(broker.getName())) {
             LOG.warn("Broker definition error in {}. Mismatched id={}. ", metadata.getName(), broker.getName());
             return null;
@@ -195,6 +210,7 @@ public class SupervisorService implements Supervisor {
         p.setProperty("id", broker.getName());
         p.setProperty("name", broker.getName());
         p.setProperty("status", broker.getStatus());
+        p.setProperty("lastModified", dateToString(xmlGregorianToDate(broker.getLastModifiedXbean())));
 
         try {
             OutputStream out = new FileOutputStream(getBrokerMetadataFile(broker.getName()));
@@ -211,7 +227,13 @@ public class SupervisorService implements Supervisor {
             out.write(xbean.getBytes());
             out.close();
         } catch (IOException e) {
+            // LOG ?
+            return;
         }
+
+        // If successful let's update the broker metadata
+        broker.setLastModifiedXbean(dateToXmlGregorian(new Date()));
+        storeBrokerMetadata(broker);
     }
 
     private String generateBrokerXbean(Broker broker) {
@@ -261,5 +283,37 @@ public class SupervisorService implements Supervisor {
 		}
         return null;
     }
+
+    // TODO: create a time utility class or check if there's something available (guava?)
+    public static final XMLGregorianCalendar dateToXmlGregorian(Date date) {
+        GregorianCalendar c = new GregorianCalendar();
+        c.setTime(date);
+        try {
+			return DatatypeFactory.newInstance().newXMLGregorianCalendar(c);
+		} catch (DatatypeConfigurationException e) {
+			// LOG
+		}
+        return null;
+    }
+
+    public static final Date xmlGregorianToDate(XMLGregorianCalendar date) {
+        return date.toGregorianCalendar().getTime();
+    }
+
+    public static final String dateToString(Date date) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        return format.format(date);
+    }
+
+    public static final Date stringToDate(String date) {
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+			return format.parse(date);
+		} catch (ParseException e) {
+			// LOG
+		}
+        return null;
+    }
+
 
 }
