@@ -27,7 +27,7 @@
 
   <amq:broker brokerName="$brokerName" useJmx="true" persistent="false">
     <amq:managementContext>
-      <amq:managementContext createConnector="true" connectorPort="1099" jmxDomainName="org.apache.activemq.nob" />
+      <amq:managementContext createConnector="true" connectorPort="1099" />
     </amq:managementContext>
 
     <amq:plugins>

@@ -35,7 +35,7 @@
       <xs:element name="id" type="xs:string" />
       <xs:element name="name" type="xs:string" />
       <xs:element name="status" type="xs:string" />
-      <xs:element name="lastModifiedXbean" type="xs:date" />
+      <xs:element name="lastModifiedXbean" type="xs:dateTime" />
     </xs:sequence>
   </xs:complexType>
 
