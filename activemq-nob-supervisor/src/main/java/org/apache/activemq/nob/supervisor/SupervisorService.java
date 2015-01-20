@@ -249,7 +249,7 @@ public class SupervisorService implements Supervisor {
 
     public static File getDataLocation() {
         File dataLocation;
-        String envData = System.getenv("NOB_DATA");
+        String envData = System.getProperty("NOB_DATA");
         if (envData == null) {
             System.getProperty("user.home");
             dataLocation = new File(new File(System.getProperty("user.home")), ".nob");
