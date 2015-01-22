@@ -39,4 +39,10 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:element name="xbeanConfig" type="tns:xbeanConfigType" />
+  <xs:complexType name="xbeanConfigType">
+    <xs:sequence>
+      <xs:element name="content" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
 </xs:schema>

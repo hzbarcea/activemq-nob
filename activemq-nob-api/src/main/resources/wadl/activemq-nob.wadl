@@ -78,7 +78,16 @@
             <representation mediaType="application/xml" />
           </response>
         </method>
+
+        <method name="PUT" id="putBrokerXbeanConfig">
+          <request>
+            <representation mediaType="application/xml">
+              <param name="xbeanContent" style="plain" type="xs:string" />
+            </representation>
+          </request>
+        </method>
       </resource>
+
       <resource path="broker/{brokerid}/status">
         <param name="brokerid" style="template" type="xs:string"/>
 

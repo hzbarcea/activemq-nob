@@ -108,6 +108,20 @@ public class SupervisorService implements Supervisor {
             Response.status(Response.Status.NOT_FOUND).build();
     }
 
+    @Override
+    public void putBrokerXbeanConfig(String brokerid, String xbeanContent) {
+        Broker broker = brokers.get(brokerid);
+        if ( broker == null ) {
+            broker = createBroker(brokerid);
+            storeBrokerMetadata(broker);
+        }
+
+        storeBrokerXbean(broker, xbeanContent);
+
+        //  TODO: setting metadata should probably automatically trigger persistent storage of value
+        brokers.put(broker.getId(), broker);
+    }
+
     public Response getBrokerStatus(String brokerid) {
         Broker broker = brokers.get(brokerid);
         return broker != null ?
@@ -117,7 +131,10 @@ public class SupervisorService implements Supervisor {
 
 
     private Broker createBroker(UUID uuid) {
-        String id = uuid.toString();
+        return  createBroker(uuid.toString());
+    }
+
+    private Broker createBroker(String id) {
         Broker broker = new Broker();
         broker.setId(id);
         broker.setName(id);
