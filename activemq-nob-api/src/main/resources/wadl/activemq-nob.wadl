@@ -59,7 +59,7 @@
           </response>
         </method>
 
-        <method name="PUT" id="updateBroker">
+        <method name="PATCH" id="updateBroker">
           <request>
             <representation mediaType="application/*+json" element="nob:broker" />
             <representation mediaType="application/json" element="nob:broker" />
