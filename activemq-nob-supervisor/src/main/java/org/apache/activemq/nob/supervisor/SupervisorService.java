@@ -29,11 +29,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.io.CharStreams;
 
-
 /**
  * JAX-RS ControlCenter root resource
  */
 public class SupervisorService implements Supervisor {
+
     private static final Logger LOG = LoggerFactory.getLogger(SupervisorService.class);
 
     private File location; // Broker data store; TODO: create an abstraction for storage
@@ -86,8 +86,31 @@ public class SupervisorService implements Supervisor {
         return brokers.get(brokerid);
     }
 
-    public void updateBroker(String brokerid, Broker brokertype) {
-        throw new UnsupportedOperationException("not yet implemented");
+    @Override
+    public void updateBroker(String brokerid, Broker brokerPatch) {
+        Broker broker = brokers.get(brokerid);
+        boolean changed = false;
+        if (broker == null) {
+            broker = createBroker(brokerid);
+            changed = true;
+        }
+
+        if (brokerPatch.getName() != null && !brokerPatch.getName().equals(broker.getName())) {
+            broker.setName(brokerPatch.getName());
+            changed = true;
+        }
+        if (brokerPatch.getStatus() != null && !brokerPatch.getStatus().equals(broker.getStatus())) {
+            broker.setStatus(brokerPatch.getStatus());
+            changed = true;
+        }
+        // won't patch broker.id
+        // won't patch broker.lastModifiedXbean
+
+        if (changed) {
+            //  TODO: setting metadata should probably automatically trigger persistent storage of value
+            storeBrokerMetadata(broker);
+            brokers.put(broker.getId(), broker);
+        }
     }
 
     public void deleteBroker(String brokerid) {
@@ -100,18 +123,18 @@ public class SupervisorService implements Supervisor {
 
     public Response getBrokerXbeanConfig(String brokerid) {
         File xbeanFile = getBrokerXbeanFile(brokerid);
-        return (xbeanFile != null) ?
-            Response.ok()
+        return (xbeanFile != null)
+                ? Response.ok()
                 .type(MediaType.APPLICATION_XML)
                 .entity(xbeanFile)
-                .lastModified(new Date(xbeanFile.lastModified())).build() :
-            Response.status(Response.Status.NOT_FOUND).build();
+                .lastModified(new Date(xbeanFile.lastModified())).build()
+                : Response.status(Response.Status.NOT_FOUND).build();
     }
 
     @Override
     public void putBrokerXbeanConfig(String brokerid, String xbeanContent) {
         Broker broker = brokers.get(brokerid);
-        if ( broker == null ) {
+        if (broker == null) {
             broker = createBroker(brokerid);
             storeBrokerMetadata(broker);
         }
@@ -124,14 +147,13 @@ public class SupervisorService implements Supervisor {
 
     public Response getBrokerStatus(String brokerid) {
         Broker broker = brokers.get(brokerid);
-        return broker != null ?
-            Response.ok().type(MediaType.TEXT_PLAIN).entity(broker.getStatus()).build() :
-            Response.status(Response.Status.NOT_FOUND).build();
+        return broker != null
+                ? Response.ok().type(MediaType.TEXT_PLAIN).entity(broker.getStatus()).build()
+                : Response.status(Response.Status.NOT_FOUND).build();
     }
 
-
     private Broker createBroker(UUID uuid) {
-        return  createBroker(uuid.toString());
+        return createBroker(uuid.toString());
     }
 
     private Broker createBroker(String id) {
@@ -149,9 +171,9 @@ public class SupervisorService implements Supervisor {
                 // Only accept if both configuration and metadata files are present
                 // This may still be insufficient, as metadata could be incorrect
                 String filename = file.getName();
-                return !file.isDirectory() 
-                    &&  fileToUuid(filename) != null
-                    &&  getBrokerXbeanFile(filename) != null;
+                return !file.isDirectory()
+                        && fileToUuid(filename) != null
+                        && getBrokerXbeanFile(filename) != null;
             }
         });
 
@@ -289,12 +311,12 @@ public class SupervisorService implements Supervisor {
 
     public static final String getXbeanConfigurationTemplate() {
         try (
-		    final InputStream xbean = SupervisorService.class.getResourceAsStream( "/META-INF/activemq-default.xml" );
-			final InputStreamReader in = new InputStreamReader(xbean)) {
-		    return CharStreams.toString(in);
-		} catch (IOException e) {
-			LOG.error("Could not read the default xbean configuration template");
-		}
+                final InputStream xbean = SupervisorService.class.getResourceAsStream("/META-INF/activemq-default.xml");
+                final InputStreamReader in = new InputStreamReader(xbean)) {
+            return CharStreams.toString(in);
+        } catch (IOException e) {
+            LOG.error("Could not read the default xbean configuration template");
+        }
         return null;
     }
 
