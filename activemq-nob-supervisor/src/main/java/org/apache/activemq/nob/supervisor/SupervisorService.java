@@ -2,28 +2,29 @@
  */
 package org.apache.activemq.nob.supervisor;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.util.Calendar;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import java.util.Map;
-import java.util.Properties;
+import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.bind.DatatypeConverter;
 
+import org.apache.activemq.nob.ActiveMQNobConstants;
 import org.apache.activemq.nob.api.Broker;
 import org.apache.activemq.nob.api.Brokers;
 import org.apache.activemq.nob.api.Supervisor;
+import org.apache.activemq.nob.filestore.DefaultFileStorePersistenceAdapter;
+import org.apache.activemq.nob.persistence.api.BrokerConfigurationServerPersistenceApi;
+import org.apache.activemq.nob.persistence.api.BrokerConfigurationUpdatePersistenceApi;
+import org.apache.activemq.nob.persistence.api.XBeanContent;
+import org.apache.activemq.nob.persistence.api.exception.BrokerConfigException;
+import org.apache.activemq.nob.persistence.api.exception.BrokerConfigPersistenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +38,9 @@ public class SupervisorService implements Supervisor {
     private static final Logger LOG = LoggerFactory.getLogger(SupervisorService.class);
 
     private File location; // Broker data store; TODO: create an abstraction for storage
-    private Map<String, Broker> brokers = new ConcurrentHashMap<String, Broker>();
-    private Map<String, String> aliases = new ConcurrentHashMap<String, String>();
+
+    private BrokerConfigurationServerPersistenceApi serverPersistenceApi;
+    private BrokerConfigurationUpdatePersistenceApi updatePersistenceApi;
 
     public SupervisorService() {
     }
@@ -51,84 +53,139 @@ public class SupervisorService implements Supervisor {
         this.location = location;
     }
 
+    public BrokerConfigurationServerPersistenceApi getServerPersistenceApi() {
+        return serverPersistenceApi;
+    }
+
+    public void setServerPersistenceApi(BrokerConfigurationServerPersistenceApi serverPersistenceApi) {
+        this.serverPersistenceApi = serverPersistenceApi;
+    }
+
+    public BrokerConfigurationUpdatePersistenceApi getUpdatePersistenceApi() {
+        return updatePersistenceApi;
+    }
+
+    public void setUpdatePersistenceApi(BrokerConfigurationUpdatePersistenceApi updatePersistenceApi) {
+        this.updatePersistenceApi = updatePersistenceApi;
+    }
+
     public void init() throws RuntimeException {
+        if ( ( this.serverPersistenceApi == null ) || ( this.updatePersistenceApi == null ) ) {
+            configureDefaultPersistence();
+        }
+    }
+
+    // REST ENDPOINT
+    public Response createBroker() {
+        Broker broker = createBroker(UUID.randomUUID());
+        String xbeanContent = generateBrokerXbean(broker);
+
+        try {
+            InputStream xbeanContentSource = makeStringInputStream(xbeanContent);
+            this.updatePersistenceApi.createNewBroker(broker, xbeanContentSource);
+        } catch (BrokerConfigPersistenceException persistenceExc) {
+            this.LOG.error("failed create a new broker", persistenceExc);
+            throw new RuntimeException("failed to persist the broker", persistenceExc);
+        }
+
+        return Response.ok().type(MediaType.APPLICATION_XML).entity(broker.getName()).build();
+    }
+
+    // REST ENDPOINT
+    public Brokers getBrokers(String filter) {
+        try {
+            List<Broker> persistenceBrokerList = this.serverPersistenceApi.retrieveBrokerList();
+            Brokers result = new Brokers();
+            // TODO: deal with the filter
+            result.getBrokers().addAll(persistenceBrokerList);
+
+            return result;
+        } catch ( BrokerConfigPersistenceException exc ) {
+            this.LOG.error("failed to retrieve broker list", exc);
+            throw new RuntimeException("failed to retrieve the broker list", exc);
+        }
+    }
+
+    // REST ENDPOINT
+    @Override
+    public Broker getBroker(String brokerid) {
+        return  this.serverPersistenceApi.lookupBroker(brokerid);
+    }
+
+    // REST ENDPOINT
+    public void updateBroker(String brokerid, Broker brokertype) {
+        throw new UnsupportedOperationException("not yet implemented");
+    }
+
+    // REST ENDPOINT
+    public void deleteBroker(String brokerid) {
+        try {
+            this.updatePersistenceApi.removeBroker(brokerid);
+        } catch ( BrokerConfigPersistenceException exc ) {
+            this.LOG.error("failed to retrieve broker xbean config", exc);
+            throw new RuntimeException("failed to retrieve broker xbean config", exc);
+        }
+    }
+
+    // REST ENDPOINT
+    public Response getBrokerXbeanConfig(String brokerid) {
+        try {
+            XBeanContent xBeanContent = this.serverPersistenceApi.getBrokerXbeanConfiguration(brokerid);
+            return (xBeanContent != null) ?
+                    Response.ok()
+                            .type(MediaType.APPLICATION_XML)
+                            .entity(xBeanContent.getContent())
+                            .lastModified(new Date(xBeanContent.getLastModified())).build() :
+                    Response.status(Response.Status.NOT_FOUND).build();
+        } catch ( BrokerConfigPersistenceException exc ) {
+            this.LOG.error("failed to retrieve broker xbean config", exc);
+            throw new RuntimeException("failed to retrieve broker xbean config", exc);
+        }
+    }
+
+    // REST ENDPOINT
+    @Override
+    public void putBrokerXbeanConfig(String brokerid, String xbeanContent) {
+        try {
+            InputStream xbeanContentSource = makeStringInputStream(xbeanContent);
+
+            this.updatePersistenceApi.writeBrokerXbeanConfig(brokerid, xbeanContentSource);
+        } catch (BrokerConfigException bcExc) {
+            this.LOG.warn("failed to update xbean config for broker: brokerId={}", brokerid, bcExc);
+            throw new RuntimeException("failed to update broker xbean file", bcExc);
+        }
+    }
+
+    // REST ENDPOINT
+    public Response getBrokerStatus(String brokerid) {
+        Broker broker = this.serverPersistenceApi.lookupBroker(brokerid);
+        return broker != null ?
+            Response.ok().type(MediaType.TEXT_PLAIN).entity(broker.getStatus()).build() :
+            Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    protected void configureDefaultPersistence () {
         if (location == null) {
             location = getDataLocation();
             if (location == null) {
                 throw new RuntimeException("Cannot access NOB data");
             }
         }
+
+        DefaultFileStorePersistenceAdapter result = new DefaultFileStorePersistenceAdapter(location);
+
         LOG.info("Using NOB data at {}", location.getAbsolutePath());
-        refreshData();
-    }
 
-    public Response createBroker() {
-        Broker broker = createBroker(UUID.randomUUID());
-        storeBrokerMetadata(broker);
-        storeBrokerXbean(broker, generateBrokerXbean(broker));
+        result.setLocation(location);
 
-        //  TODO: setting metadata should probably automatically trigger persistent storage of value
-        brokers.put(broker.getId(), broker);
-        // no need to add the default name to aliases
-
-        return Response.ok().type(MediaType.APPLICATION_XML).entity(broker.getName()).build();
-    }
-
-    public Brokers getBrokers(String filter) {
-        Brokers result = new Brokers();
-        // TODO: deal with the filter
-        result.getBrokers().addAll(brokers.values());
-        return result;
-    }
-
-    @Override
-    public Broker getBroker(String brokerid) {
-        return brokers.get(brokerid);
-    }
-
-    public void updateBroker(String brokerid, Broker brokertype) {
-        throw new UnsupportedOperationException("not yet implemented");
-    }
-
-    public void deleteBroker(String brokerid) {
-        brokers.remove(brokerid);
-
-        // Now remove files associated with the broker removed...
-        deleteBrokerDataFile(getBrokerMetadataFile(brokerid));
-        deleteBrokerDataFile(getBrokerXbeanFile(brokerid));
-    }
-
-    public Response getBrokerXbeanConfig(String brokerid) {
-        File xbeanFile = getBrokerXbeanFile(brokerid);
-        return (xbeanFile != null) ?
-            Response.ok()
-                .type(MediaType.APPLICATION_XML)
-                .entity(xbeanFile)
-                .lastModified(new Date(xbeanFile.lastModified())).build() :
-            Response.status(Response.Status.NOT_FOUND).build();
-    }
-
-    @Override
-    public void putBrokerXbeanConfig(String brokerid, String xbeanContent) {
-        Broker broker = brokers.get(brokerid);
-        if ( broker == null ) {
-            broker = createBroker(brokerid);
-            storeBrokerMetadata(broker);
+        if ( this.serverPersistenceApi == null ) {
+            this.serverPersistenceApi = result;
         }
 
-        storeBrokerXbean(broker, xbeanContent);
-
-        //  TODO: setting metadata should probably automatically trigger persistent storage of value
-        brokers.put(broker.getId(), broker);
+        if ( this.updatePersistenceApi == null ) {
+            this.updatePersistenceApi = result;
+        }
     }
-
-    public Response getBrokerStatus(String brokerid) {
-        Broker broker = brokers.get(brokerid);
-        return broker != null ?
-            Response.ok().type(MediaType.TEXT_PLAIN).entity(broker.getStatus()).build() :
-            Response.status(Response.Status.NOT_FOUND).build();
-    }
-
 
     private Broker createBroker(UUID uuid) {
         return  createBroker(uuid.toString());
@@ -138,116 +195,8 @@ public class SupervisorService implements Supervisor {
         Broker broker = new Broker();
         broker.setId(id);
         broker.setName(id);
-        broker.setStatus(SupervisorConstants.STATUS_NEW);
+        broker.setStatus(ActiveMQNobConstants.STATUS_NEW);
         return broker;
-    }
-
-    private void refreshData() {
-        File[] brokerDefinitions = location.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                // Only accept if both configuration and metadata files are present
-                // This may still be insufficient, as metadata could be incorrect
-                String filename = file.getName();
-                return !file.isDirectory() 
-                    &&  fileToUuid(filename) != null
-                    &&  getBrokerXbeanFile(filename) != null;
-            }
-        });
-
-        brokers.clear();
-        for (File def : brokerDefinitions) {
-            Broker broker = loadBrokerMetadata(def);
-            if (broker == null) {
-                LOG.warn("Broker definition parse error ({}). Ignoring...", def.getName());
-                continue;
-            }
-
-            String id = broker.getId();
-            Broker old = brokers.put(id, broker);
-            if (!id.equals(broker.getName())) {
-                aliases.put(broker.getName(), id);
-            }
-            if (old != null) {
-                // We avoided synchronizing using a ConcurrentHashMap, but
-                // if we replaced an existing value, there is a logic failure somewhere
-                LOG.warn("NOB - broker {} already exists. Data may be corrupted.");
-            }
-        }
-    }
-
-    private File getBrokerMetadataFile(String brokerid) {
-        File path = new File(location, brokerid);
-        return path.exists() && path.isDirectory() ? null : path;
-    }
-
-    private File getBrokerXbeanFile(String brokerid) {
-        File path = new File(location, brokerid + "-xbean.xml");
-        return path.exists() && path.isDirectory() ? null : path;
-    }
-
-    private void deleteBrokerDataFile(File data) {
-        if (data != null && data.exists()) {
-            LOG.info("Deleting broker data: {}", data.getName());
-            data.delete();
-        }
-    }
-
-    private Broker loadBrokerMetadata(File metadata) {
-        Properties p = new Properties();
-
-        try {
-            InputStream in = new FileInputStream(metadata);
-            p.load(in);
-        } catch (IOException e) {
-            return null;
-        }
-
-        Broker broker = new Broker();
-        broker.setId(p.getProperty("id"));
-        broker.setName(p.getProperty("name"));
-        broker.setStatus(p.getProperty("status"));
-
-        // Right now we don't store the lastModified timestamp, we retrive from fs
-        Calendar lastModified = Calendar.getInstance();
-        lastModified.setTimeInMillis(getBrokerXbeanFile(broker.getId()).lastModified());
-        broker.setLastModifiedXbean(lastModified);
-
-        if (!metadata.getName().equals(broker.getName())) {
-            LOG.warn("Broker definition error in {}. Mismatched id={}. ", metadata.getName(), broker.getName());
-            return null;
-        }
-
-        return broker;
-    }
-
-    private void storeBrokerMetadata(Broker broker) {
-        Properties p = new Properties();
-        p.setProperty("id", broker.getName());
-        p.setProperty("name", broker.getName());
-        p.setProperty("status", broker.getStatus());
-
-        try {
-            OutputStream out = new FileOutputStream(getBrokerMetadataFile(broker.getName()));
-            p.store(out, "# Broker definition for " + broker.getName());
-        } catch (IOException e) {
-            LOG.info("Failed to store broker metadata for '{}': {}", broker.getName(), e.getMessage());
-        }
-    }
-
-    private void storeBrokerXbean(Broker broker, String xbean) {
-        OutputStream out;
-        try {
-            out = new FileOutputStream(getBrokerXbeanFile(broker.getName()));
-            out.write(xbean.getBytes());
-            out.close();
-        } catch (IOException e) {
-            // LOG ?
-            return;
-        }
-
-        // If successful let's update the broker metadata
-        broker.setLastModifiedXbean(Calendar.getInstance());
     }
 
     private String generateBrokerXbean(Broker broker) {
@@ -255,16 +204,7 @@ public class SupervisorService implements Supervisor {
         return xbean.replaceAll("\\$brokerName", broker.getName());
     }
 
-    public static UUID fileToUuid(String name) {
-        try {
-            return UUID.fromString(name);
-        } catch (IllegalArgumentException e) {
-            // filename does not confirm with convention; ignore
-        }
-        return null;
-    }
-
-    public static File getDataLocation() {
+    private static File getDataLocation() {
         File dataLocation;
         String envData = System.getProperty("NOB_DATA");
         if (envData == null) {
@@ -285,6 +225,16 @@ public class SupervisorService implements Supervisor {
             return null;
         }
         return dataLocation;
+    }
+
+    private InputStream makeStringInputStream(String value) {
+        try {
+            ByteArrayInputStream result = new ByteArrayInputStream(value.getBytes("UTF-8"));
+            return  result;
+        } catch ( UnsupportedEncodingException ueExc ) {
+            LOG.error("UTF-8 unsupported");
+            throw new RuntimeException("UTF-8 unsupported");
+        }
     }
 
     public static final String getXbeanConfigurationTemplate() {

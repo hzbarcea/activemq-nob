@@ -1,19 +1,19 @@
 /**
  */
-package org.apache.activemq.nob.supervisor;
+package org.apache.activemq.nob;
 
 
 
 /**
  * JAX-RS ControlCenter root resource
  */
-public final class SupervisorConstants {
+public final class ActiveMQNobConstants {
 
 	public static final String STATUS_UNKNOWN = "UNKNOWN";
 	public static final String STATUS_NEW = "NEW";
 	public static final String STATUS_ACTIVE = "ACTIVE";
 
-	private SupervisorConstants() {
+	private ActiveMQNobConstants() {
 		// Utility
 	}
 }

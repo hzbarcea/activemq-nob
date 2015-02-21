@@ -32,14 +32,31 @@
   <name>ActiveMQ :: NOB</name>
 
   <properties>
+    <commons.io.version>2.4</commons.io.version>
     <cxf.version>3.0.1</cxf.version>
     <guava.version>18.0</guava.version>
   </properties>
 
   <modules>
     <module>activemq-nob-api</module>
+    <module>activemq-nob-persistence-api</module>
+    <module>activemq-nob-filestore</module>
     <module>activemq-nob-supervisor</module>
   </modules>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>activemq-nob-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>activemq-nob-persistence-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 </project>
 

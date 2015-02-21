@@ -21,6 +21,16 @@
       <artifactId>activemq-nob-api</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.activemq.nob</groupId>
+      <artifactId>activemq-nob-persistence-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.activemq.nob</groupId>
+      <artifactId>activemq-nob-filestore</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.cxf</groupId>
