@@ -11,6 +11,7 @@ target
 .classpath
 .settings
 .metadata
+nbactions.xml
 activemq-data
 data/
 velocity.log
