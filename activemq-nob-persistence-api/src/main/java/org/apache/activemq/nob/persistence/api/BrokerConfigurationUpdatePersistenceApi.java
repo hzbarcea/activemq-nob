@@ -12,6 +12,9 @@ import java.io.InputStream;
  * Created by art on 2/19/15.
  */
 public interface BrokerConfigurationUpdatePersistenceApi {
+
+    void init();
+
     /**
      * Create a new broker with the given details in the persistent store.
      *

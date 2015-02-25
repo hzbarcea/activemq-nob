@@ -94,6 +94,11 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
     }
 
     @Override
+    public void init() {
+        refreshBrokerList();
+    }
+
+    @Override
     public List<Broker> retrieveBrokerList() throws BrokerConfigPersistenceException {
         if ( ! brokerListLoadedInd) {
             refreshBrokerList();

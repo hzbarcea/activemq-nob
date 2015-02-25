@@ -12,6 +12,9 @@ import java.util.List;
  * Created by art on 2/19/15.
  */
 public interface BrokerConfigurationServerPersistenceApi {
+
+    void init();
+
     /**
      * Retrieve the list of known brokers to the persistence layer.
      *

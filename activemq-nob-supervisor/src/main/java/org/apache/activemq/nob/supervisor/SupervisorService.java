@@ -73,6 +73,9 @@ public class SupervisorService implements Supervisor {
         if ( ( this.serverPersistenceApi == null ) || ( this.updatePersistenceApi == null ) ) {
             configureDefaultPersistence();
         }
+
+        this.serverPersistenceApi.init();
+        this.updatePersistenceApi.init();
     }
 
     // REST ENDPOINT
