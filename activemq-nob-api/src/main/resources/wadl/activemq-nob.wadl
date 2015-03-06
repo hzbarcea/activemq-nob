@@ -127,7 +127,41 @@
         </method>
       </resource>
 
+      <resource path="broker/{brokerid}/properties">
+        <param name="brokerid" style="template" type="xs:string"/>
+        
+        <method name="GET" id="listProperties">
+            <response>
+                <representation mediaType="application/*+json" element="nob:propertyKeyList" />
+                <representation mediaType="application/json" element="nob:propertyKeyList" />
+                <representation mediaType="application/xml" element="nob:propertyKeyList" />
+            </response>
+        </method>
+      </resource>
+    
+      <resource path="broker/{brokerid}/property/{key}">
+        <param name="brokerid" style="template" type="xs:string"/>
+        <param name="key" style="template" type="xs:string"/>
+        
+        <method name="GET" id="getProperty">
+            <response>
+                <representation mediaType="text/plain" />
+            </response>
+        </method>
+        
+        <method name="PUT" id="setProperty">
+            <request>
+                <representation mediaType="text/plain">
+                    <param name="value" style="plain" type="xs:string" />
+                </representation>
+            </request>
+        </method>
+        
+        <method name="DELETE" id="unsetProperty" />
+      </resource>
+
     </resource>
+
   </resources>
 </application>
 

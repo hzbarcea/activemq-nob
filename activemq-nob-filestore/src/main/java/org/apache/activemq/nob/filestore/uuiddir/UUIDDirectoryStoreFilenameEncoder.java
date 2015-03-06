@@ -14,6 +14,7 @@ import java.io.File;
  */
 public class UUIDDirectoryStoreFilenameEncoder implements BrokerFilenameEncoder {
     public static final String  XBEAN_FILE_PATH_SUFFIX = "-xbean.xml";
+    public static final String  PROPERTIES_FILE_PATH_SUFFIX = ".properties";
 
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(UUIDDirectoryStoreFilenameEncoder.class);
 
@@ -31,6 +32,13 @@ public class UUIDDirectoryStoreFilenameEncoder implements BrokerFilenameEncoder 
         return  result;
     }
 
+    @Override
+    public File locateBrokerPropertiesFilePath(String brokerId) {
+        File result = new File(this.root, brokerId + PROPERTIES_FILE_PATH_SUFFIX);
+
+        return  result;
+    }
+    
     @Override
     public File locateBrokerXbeanFilePath(String brokerId) {
         File result = new File(this.root, brokerId + XBEAN_FILE_PATH_SUFFIX);

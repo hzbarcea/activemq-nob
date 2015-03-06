@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.io.CharStreams;
 import org.apache.activemq.nob.persistence.api.XMLConfigContent;
-
+import org.apache.activemq.nob.api.PropertyKeyList;
 
 /**
  * JAX-RS ControlCenter root resource
@@ -71,6 +71,59 @@ public class SupervisorService implements Supervisor {
     }
 
     public void init() throws RuntimeException {
+    }
+
+    // REST ENDPOINT
+    @Override
+    public PropertyKeyList listProperties(String brokerid) {
+        PropertyKeyList result = new PropertyKeyList();
+        try {
+            List<String> props = this.serverPersistenceApi.listProperties(brokerid);
+            if (props != null) {
+                for (String key : props) {
+                    result.getKeies().add(key);
+                }
+            }
+        } catch (BrokerConfigException ex) {
+            LOG.warn("failed to read properties for broker: brokerId={}", brokerid, ex);
+        }
+        return result;
+    }
+
+    // REST ENDPOINT
+    @Override
+    public Response getProperty(String brokerid, String key) {
+        try {
+            InputStream value = this.serverPersistenceApi.getProperty(brokerid, key);
+            return value == null
+                    ? Response.status(Response.Status.NOT_FOUND).build()
+                    : Response.ok().entity(value).build();
+        } catch (BrokerConfigException ex) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+    }
+
+    // REST ENDPOINT
+    @Override
+    public void setProperty(String brokerid, String key, String value) {
+        try {
+            InputStream contents = makeStringInputStream(value);
+            this.updatePersistenceApi.setProperty(brokerid, key, contents);
+        } catch (BrokerConfigException ex) {
+            LOG.warn("failed to update properties for broker: brokerId={}", brokerid, ex);
+            throw new RuntimeException("failed to update broker properties file", ex);
+        }
+    }
+
+    // REST ENDPOINT
+    @Override
+    public void unsetProperty(String brokerid, String key) {
+        try {
+            this.updatePersistenceApi.unsetProperty(brokerid, key);
+        } catch (BrokerConfigException ex) {
+            LOG.warn("failed to update properties for broker: brokerId={}", brokerid, ex);
+            throw new RuntimeException("failed to update broker properties file", ex);
+        }
     }
 
     // REST ENDPOINT

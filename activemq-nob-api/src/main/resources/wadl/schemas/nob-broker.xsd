@@ -46,4 +46,31 @@
       <xs:element name="content" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
+
+    <xs:element name="propertyKeyList" type="tns:keyList" />
+    <xs:complexType name="keyList">
+        <xs:sequence>
+            <xs:element name="key" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:element name="propertyList" type="tns:map" />
+    <xs:complexType name="map">
+        <xs:sequence>
+            <xs:element name="item" type="tns:mapItemType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <!-- not supported by wadl2java -->
+        <!-- xs:unique name="item">
+            <xs:selector xpath="item"/>
+            <xs:field xpath="key"/>
+        </xs:unique -->
+    </xs:complexType>
+    
+    <xs:complexType name="mapItemType">
+        <xs:sequence>
+            <xs:element name="key" type="xs:string"/>
+            <xs:element name="value" type="xs:anyType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
 </xs:schema>
