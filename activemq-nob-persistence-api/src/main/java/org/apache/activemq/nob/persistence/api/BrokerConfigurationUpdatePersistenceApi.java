@@ -12,6 +12,9 @@ import java.io.InputStream;
  * Created by art on 2/19/15.
  */
 public interface BrokerConfigurationUpdatePersistenceApi {
+
+    void init();
+
     /**
      * Create a new broker with the given details in the persistent store.
      *
@@ -26,7 +29,7 @@ public interface BrokerConfigurationUpdatePersistenceApi {
      * @param updateBroker the broker information to update in the persistent store.
      * @throws BrokerConfigPersistenceException on errors accessing persistence or updating the broker
      */
-    void updateBroker(Broker updateBroker) throws BrokerConfigPersistenceException;
+    void updateBroker(Broker updateBroker) throws BrokerConfigException;
 
     /**
      * Write the XBean configuration for the broker with the given identifier.

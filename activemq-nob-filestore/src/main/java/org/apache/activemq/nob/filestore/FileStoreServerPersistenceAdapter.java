@@ -94,6 +94,11 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
     }
 
     @Override
+    public void init() {
+        refreshBrokerList();
+    }
+
+    @Override
     public List<Broker> retrieveBrokerList() throws BrokerConfigPersistenceException {
         if ( ! brokerListLoadedInd) {
             refreshBrokerList();
@@ -157,8 +162,12 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
     }
 
     @Override
-    public void updateBroker(Broker updateBroker) throws BrokerConfigPersistenceException {
-
+    public void updateBroker(Broker updateBroker) throws BrokerConfigNotFoundException {
+        BrokerInformation brokerInfo = this.brokers.get(updateBroker.getId());
+        if (brokerInfo == null) {
+            throw new BrokerConfigNotFoundException("no broker " + updateBroker.getId());
+        }
+        this.brokerMetadataWriter.writeBrokerMetadata(brokerInfo.metadataPath, updateBroker);
     }
 
     @Override
