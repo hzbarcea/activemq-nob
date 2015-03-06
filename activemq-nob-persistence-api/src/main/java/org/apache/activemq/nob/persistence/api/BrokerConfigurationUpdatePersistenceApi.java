@@ -26,7 +26,7 @@ public interface BrokerConfigurationUpdatePersistenceApi {
      * @param updateBroker the broker information to update in the persistent store.
      * @throws BrokerConfigPersistenceException on errors accessing persistence or updating the broker
      */
-    void updateBroker(Broker updateBroker) throws BrokerConfigPersistenceException;
+    void updateBroker(Broker updateBroker) throws BrokerConfigException;
 
     /**
      * Write the XBean configuration for the broker with the given identifier.
