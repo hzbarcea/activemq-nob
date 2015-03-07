@@ -87,6 +87,24 @@
           </request>
         </method>
       </resource>
+      
+      <resource path="broker/{brokerid}/deploy">
+        <param name="brokerid" style="template" type="xs:string"/>
+        <method name="POST" id="deployBroker">
+            <response>
+                <representation mediaType="*" />
+            </response>
+        </method>
+      </resource>
+      
+      <resource path="broker/{brokerid}/undeploy">
+        <param name="brokerid" style="template" type="xs:string"/>
+        <method name="POST" id="undeployBroker">
+            <response>
+                <representation mediaType="*" />
+            </response>
+        </method>
+      </resource>
 
       <resource path="broker/{brokerid}/status">
         <param name="brokerid" style="template" type="xs:string"/>
