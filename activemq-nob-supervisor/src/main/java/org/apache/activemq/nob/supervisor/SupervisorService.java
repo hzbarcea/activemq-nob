@@ -73,6 +73,9 @@ public class SupervisorService implements Supervisor {
         if ( ( this.serverPersistenceApi == null ) || ( this.updatePersistenceApi == null ) ) {
             configureDefaultPersistence();
         }
+
+        this.serverPersistenceApi.init();
+        this.updatePersistenceApi.init();
     }
 
     // REST ENDPOINT
@@ -114,7 +117,12 @@ public class SupervisorService implements Supervisor {
 
     // REST ENDPOINT
     public void updateBroker(String brokerid, Broker brokertype) {
-        throw new UnsupportedOperationException("not yet implemented");
+        try {
+            this.updatePersistenceApi.updateBroker(brokertype);
+        } catch (BrokerConfigException ex) {
+            LOG.error("failed to update broker", ex);
+            throw new RuntimeException("failed to update broker", ex);
+        }
     }
 
     // REST ENDPOINT
