@@ -14,6 +14,10 @@ import java.util.List;
 import java.util.UUID;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import org.apache.activemq.nob.ActiveMQNobConstants;
 import org.apache.activemq.nob.api.Broker;
 import org.apache.activemq.nob.api.Brokers;
@@ -137,13 +141,13 @@ public class SupervisorService implements Supervisor {
     public Response getBrokerXbeanConfig(String brokerid) {
         try {
             XBeanContent xBeanContent = this.serverPersistenceApi.getBrokerXbeanConfiguration(brokerid);
-            return (xBeanContent != null)
-                    ? Response.ok()
-                    .type(MediaType.APPLICATION_XML)
-                    .entity(xBeanContent.getContent())
-                    .lastModified(new Date(xBeanContent.getLastModified())).build()
-                    : Response.status(Response.Status.NOT_FOUND).build();
-        } catch (BrokerConfigPersistenceException exc) {
+            return (xBeanContent != null) ?
+                    Response.ok()
+                            .type(MediaType.APPLICATION_XML)
+                            .entity(xBeanContent.getContent())
+                            .lastModified(new Date(xBeanContent.getLastModified())).build() :
+                    Response.status(Response.Status.NOT_FOUND).build();
+        } catch ( BrokerConfigPersistenceException exc ) {
             this.LOG.error("failed to retrieve broker xbean config", exc);
             throw new RuntimeException("failed to retrieve broker xbean config", exc);
         }
@@ -165,9 +169,9 @@ public class SupervisorService implements Supervisor {
     // REST ENDPOINT
     public Response getBrokerStatus(String brokerid) {
         Broker broker = this.serverPersistenceApi.lookupBroker(brokerid);
-        return broker != null
-                ? Response.ok().type(MediaType.TEXT_PLAIN).entity(broker.getStatus()).build()
-                : Response.status(Response.Status.NOT_FOUND).build();
+        return broker != null ?
+            Response.ok().type(MediaType.TEXT_PLAIN).entity(broker.getStatus()).build() :
+            Response.status(Response.Status.NOT_FOUND).build();
     }
 
     private void configureDefaultDeployment() {
