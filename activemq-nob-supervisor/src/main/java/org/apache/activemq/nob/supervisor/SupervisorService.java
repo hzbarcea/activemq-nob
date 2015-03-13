@@ -2,6 +2,7 @@
  */
 package org.apache.activemq.nob.supervisor;
 
+import com.google.common.io.CharStreams;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,40 +11,49 @@ import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
+import javax.ws.rs.core.UriInfo;
 import org.apache.activemq.nob.ActiveMQNobConstants;
 import org.apache.activemq.nob.api.Broker;
 import org.apache.activemq.nob.api.Brokers;
+import org.apache.activemq.nob.api.PropertyKeyList;
 import org.apache.activemq.nob.api.Supervisor;
 import org.apache.activemq.nob.deployment.api.BrokerDeploymentApi;
 import org.apache.activemq.nob.deployment.api.exception.BrokerDeploymentException;
 import org.apache.activemq.nob.persistence.api.BrokerConfigurationServerPersistenceApi;
 import org.apache.activemq.nob.persistence.api.BrokerConfigurationUpdatePersistenceApi;
 import org.apache.activemq.nob.persistence.api.XBeanContent;
+import org.apache.activemq.nob.persistence.api.XMLConfigContent;
 import org.apache.activemq.nob.persistence.api.exception.BrokerConfigException;
 import org.apache.activemq.nob.persistence.api.exception.BrokerConfigPersistenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.io.CharStreams;
-import org.apache.activemq.nob.persistence.api.XMLConfigContent;
-import org.apache.activemq.nob.api.PropertyKeyList;
-
 /**
  * JAX-RS ControlCenter root resource
  */
 public class SupervisorService implements Supervisor {
-
     private static final Logger LOG = LoggerFactory.getLogger(SupervisorService.class);
 
     private BrokerConfigurationServerPersistenceApi serverPersistenceApi;
     private BrokerConfigurationUpdatePersistenceApi updatePersistenceApi;
     private BrokerDeploymentApi deploymentApi;
 
+    @Context
+    private UriInfo ui;
+
     public SupervisorService() {
+    }
+
+    @Context
+    public void setUriInfo(UriInfo ui) {
+        this.ui = ui;
+    }
+
+    public UriInfo getUriInfo() {
+        return this.ui;
     }
 
     public BrokerConfigurationServerPersistenceApi getServerPersistenceApi() {
