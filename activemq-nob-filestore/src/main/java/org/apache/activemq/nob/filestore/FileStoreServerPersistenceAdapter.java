@@ -168,6 +168,7 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
             throw new BrokerConfigNotFoundException("no broker " + updateBroker.getId());
         }
         this.brokerMetadataWriter.writeBrokerMetadata(brokerInfo.metadataPath, updateBroker);
+        brokerInfo.metadata = updateBroker;
     }
 
     @Override
