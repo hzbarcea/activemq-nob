@@ -36,6 +36,7 @@
       <xs:element name="name" type="xs:string" />
       <xs:element name="status" type="xs:string" />
       <xs:element name="lastModifiedXbean" type="xs:dateTime" />
+      <xs:element name="brokerUrl" type="xs:anyURI" minOccurs="0" />
     </xs:sequence>
   </xs:complexType>
 
