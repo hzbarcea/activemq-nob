@@ -23,6 +23,7 @@ import org.apache.activemq.nob.filestore.DefaultFileStorePersistenceAdapter;
 import org.apache.activemq.nob.persistence.api.BrokerConfigurationServerPersistenceApi;
 import org.apache.activemq.nob.persistence.api.BrokerConfigurationUpdatePersistenceApi;
 import org.apache.activemq.nob.persistence.api.XBeanContent;
+import org.apache.activemq.nob.persistence.api.XMLConfigContent;
 import org.apache.activemq.nob.persistence.api.exception.BrokerConfigException;
 import org.apache.activemq.nob.persistence.api.exception.BrokerConfigPersistenceException;
 import org.slf4j.Logger;
@@ -170,6 +171,24 @@ public class SupervisorService implements Supervisor {
         return broker != null ?
             Response.ok().type(MediaType.TEXT_PLAIN).entity(broker.getStatus()).build() :
             Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    @Override
+    public Response getBrokerConfigXmlFile (String brokerid, String configName) {
+        try {
+            XMLConfigContent configContent = this.serverPersistenceApi.getBrokerXmlConfigFile(brokerid, configName);
+            return (configContent != null) ?
+                    Response.ok()
+                            .type(MediaType.APPLICATION_XML)
+                            .entity(configContent.getContent())
+                            .lastModified(new Date(configContent.getLastModified()))
+                            .build()
+                    :
+                    Response.status(Response.Status.NOT_FOUND).build();
+        } catch ( BrokerConfigPersistenceException exc ) {
+            this.LOG.error("failed to retrieve broker xml config for {}", configName, exc);
+            throw new RuntimeException("failed to retrieve broker xml config for " + configName, exc);
+        }
     }
 
     protected void configureDefaultPersistence () {
