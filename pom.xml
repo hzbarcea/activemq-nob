@@ -43,6 +43,7 @@
     <module>activemq-nob-deployment-api</module>
     <module>activemq-nob-deployment-samples</module>
     <module>activemq-nob-command</module>
+    <module>activemq-nob-branding</module>
   </modules>
 
   <dependencyManagement>
