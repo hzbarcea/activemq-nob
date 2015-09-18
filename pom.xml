@@ -42,6 +42,7 @@
     <module>activemq-nob-supervisor</module>
     <module>activemq-nob-deployment-api</module>
     <module>activemq-nob-deployment-samples</module>
+    <module>activemq-nob-command</module>
   </modules>
 
   <dependencyManagement>
