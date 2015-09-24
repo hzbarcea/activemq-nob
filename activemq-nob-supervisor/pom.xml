@@ -11,7 +11,7 @@
   </parent>
 
   <artifactId>activemq-nob-supervisor</artifactId>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
   <name>ActiveMQ :: NOB :: Supervisor</name>
   <description>ActiveMQ Network of Brokers supervisor and configuration server</description>
 
@@ -38,7 +38,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>activemq-nob-deployment-samples</artifactId>
+      <artifactId>activemq-nob-deployment-sample-log</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -115,6 +115,23 @@
           <argLine>-DNOB_DATA=${project.build.directory}/nob/</argLine>
         </configuration>
       </plugin>
+        <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <extensions>true</extensions>
+            <configuration>
+                <instructions>
+                    <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                    <Bundle-Version>${project.version}</Bundle-Version>
+                    <Export-Package>
+                        org.apache.activemq.nob.supervisor*;version=${project.version}
+                    </Export-Package>
+                    <Import-Package>
+                        *
+                    </Import-Package>
+                </instructions>
+            </configuration>
+        </plugin>
     </plugins>
   </build>
 

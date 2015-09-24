@@ -26,10 +26,9 @@
         <version>5.11-SNAPSHOT</version>
     </parent>
 
-    <artifactId>activemq-nob-deployment-samples</artifactId>
-    <packaging>jar</packaging>
-
-    <name>ActiveMQ :: NOB :: Deployment Samples</name>
+    <artifactId>activemq-nob-deployment-sample-log</artifactId>
+    <packaging>bundle</packaging>
+    <name>ActiveMQ :: NOB :: Logging Deployment Sample</name>
     <description>ActiveMQ NOB Deployment Samples</description>
 
     <dependencies>
@@ -65,4 +64,26 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Export-Package>
+                            org.apache.activemq.nob.deployment.sample.log*;version=${project.version}
+                        </Export-Package>
+                        <Import-Package>
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

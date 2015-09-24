@@ -9,6 +9,7 @@
     </parent>
 
     <artifactId>activemq-nob-deployment-api</artifactId>
+    <packaging>bundle</packaging>
     <name>ActiveMQ :: NOB :: Deployment API</name>
     <description>Please refer to https://github.com/holisticon/activemq-nob-deployment-api.</description>
 
@@ -18,5 +19,27 @@
       <artifactId>activemq-nob-api</artifactId>
     </dependency>
   </dependencies>
+
+  <build>
+      <plugins>
+        <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <extensions>true</extensions>
+            <configuration>
+                <instructions>
+                    <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                    <Bundle-Version>${project.version}</Bundle-Version>
+                    <Export-Package>
+                        org.apache.activemq.nob.deployment.api*;version=${project.version}
+                    </Export-Package>
+                    <Import-Package>
+                        *
+                    </Import-Package>
+                </instructions>
+            </configuration>
+        </plugin>
+      </plugins>
+  </build>
 
 </project>

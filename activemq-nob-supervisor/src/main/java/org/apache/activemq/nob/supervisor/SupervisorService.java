@@ -20,7 +20,7 @@ import org.apache.activemq.nob.api.Brokers;
 import org.apache.activemq.nob.api.Supervisor;
 import org.apache.activemq.nob.deployment.api.BrokerDeploymentApi;
 import org.apache.activemq.nob.deployment.api.exception.BrokerDeploymentException;
-import org.apache.activemq.nob.deployment.samples.LoggingDeploymentImplementation;
+import org.apache.activemq.nob.deployment.sample.log.LoggingDeploymentImplementation;
 import org.apache.activemq.nob.filestore.DefaultFileStorePersistenceAdapter;
 import org.apache.activemq.nob.persistence.api.BrokerConfigurationServerPersistenceApi;
 import org.apache.activemq.nob.persistence.api.BrokerConfigurationUpdatePersistenceApi;

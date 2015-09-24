@@ -31,7 +31,7 @@
 
   <properties>
     <commons.io.version>2.4</commons.io.version>
-    <cxf.version>3.0.1</cxf.version>
+    <cxf.version>3.1.0</cxf.version>
     <guava.version>18.0</guava.version>
   </properties>
 
@@ -41,9 +41,10 @@
     <module>activemq-nob-filestore</module>
     <module>activemq-nob-supervisor</module>
     <module>activemq-nob-deployment-api</module>
-    <module>activemq-nob-deployment-samples</module>
     <module>activemq-nob-command</module>
     <module>activemq-nob-branding</module>
+    <module>activemq-nob-feature</module>
+    <module>activemq-nob-deployment-sample-log</module>
   </modules>
 
   <dependencyManagement>

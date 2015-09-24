@@ -36,11 +36,11 @@
         </cxf:features>
     </cxf:bus>
 
-     <jaxrs:server id="owControlCenterService" address="/cc">
+     <jaxrs:server id="activemqNobSupervisorService" address="/cc">
         <jaxrs:serviceBeans>
-           <ref component-id="owControlCenterBean" />
+           <ref component-id="activemqNobSupervisorServiceBean" />
         </jaxrs:serviceBeans>
      </jaxrs:server>
 
-     <bean id="owControlCenterBean" class="org.example.activemq.orbweaver.cc.ControlCenterService"/>
+     <bean id="activemqNobSupervisorServiceBean" class="org.apache.activemq.nob.supervisor.SupervisorService"/>
 </blueprint>
