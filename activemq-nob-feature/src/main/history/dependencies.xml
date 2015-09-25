@@ -2,7 +2,11 @@
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" name="activemq-nob-feature-5.11-SNAPSHOT">
     <feature version="0.0.0">
         <feature prerequisite="false" dependency="false">activemq-nob-api</feature>
+        <feature prerequisite="false" dependency="false">activemq-nob-api</feature>
+        <feature prerequisite="false" dependency="false">activemq-nob-api</feature>
+        <feature prerequisite="false" dependency="false">activemq-nob-api</feature>
         <feature prerequisite="false" dependency="false">activemq-nob-deployment-api</feature>
+        <feature prerequisite="false" dependency="false">activemq-nob-deployment-sample-log</feature>
         <feature prerequisite="false" dependency="false">activemq-nob-deployment-sample-log</feature>
         <feature prerequisite="false" dependency="false">activemq-nob-filestore</feature>
         <feature prerequisite="false" dependency="false">activemq-nob-persistence-api</feature>
@@ -14,6 +18,7 @@
         <bundle>mvn:org.apache.activemq.nob/activemq-nob-deployment-sample-log/5.11-SNAPSHOT</bundle>
         <bundle>mvn:org.apache.activemq.nob/activemq-nob-filestore/5.11-SNAPSHOT</bundle>
         <bundle>mvn:org.apache.activemq.nob/activemq-nob-persistence-api/5.11-SNAPSHOT</bundle>
+        <bundle>mvn:org.apache.activemq.nob/activemq-nob-supervisor/5.11-SNAPSHOT</bundle>
         <bundle>mvn:org.apache.activemq.nob/activemq-nob-supervisor/5.11-SNAPSHOT</bundle>
     </feature>
 </features>

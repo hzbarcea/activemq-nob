@@ -37,21 +37,11 @@ public class SupervisorService implements Supervisor {
 
     private static final Logger LOG = LoggerFactory.getLogger(SupervisorService.class);
 
-    private File location; // Broker data store; TODO: create an abstraction for storage
-
     private BrokerConfigurationServerPersistenceApi serverPersistenceApi;
     private BrokerConfigurationUpdatePersistenceApi updatePersistenceApi;
     private BrokerDeploymentApi deploymentApi;
 
     public SupervisorService() {
-    }
-
-    public File getLocation() {
-        return location;
-    }
-
-    public void setLocation(File location) {
-        this.location = location;
     }
 
     public BrokerConfigurationServerPersistenceApi getServerPersistenceApi() {
@@ -79,16 +69,10 @@ public class SupervisorService implements Supervisor {
     }
 
     public void init() throws RuntimeException {
-        if ((this.serverPersistenceApi == null) || (this.updatePersistenceApi == null)) {
-            configureDefaultPersistence();
-        }
-
         if (this.deploymentApi == null) {
             configureDefaultDeployment();
         }
 
-        this.serverPersistenceApi.init();
-        this.updatePersistenceApi.init();
         this.deploymentApi.init();
     }
 
@@ -186,29 +170,6 @@ public class SupervisorService implements Supervisor {
                 : Response.status(Response.Status.NOT_FOUND).build();
     }
 
-    protected void configureDefaultPersistence() {
-        if (location == null) {
-            location = getDataLocation();
-            if (location == null) {
-                throw new RuntimeException("Cannot access NOB data");
-            }
-        }
-
-        DefaultFileStorePersistenceAdapter result = new DefaultFileStorePersistenceAdapter(location);
-
-        LOG.info("Using NOB data at {}", location.getAbsolutePath());
-
-        result.setLocation(location);
-
-        if (this.serverPersistenceApi == null) {
-            this.serverPersistenceApi = result;
-        }
-
-        if (this.updatePersistenceApi == null) {
-            this.updatePersistenceApi = result;
-        }
-    }
-
     private void configureDefaultDeployment() {
         deploymentApi = new LoggingDeploymentImplementation();
     }
@@ -228,29 +189,6 @@ public class SupervisorService implements Supervisor {
     private String generateBrokerXbean(Broker broker) {
         String xbean = getXbeanConfigurationTemplate();
         return xbean.replaceAll("\\$brokerName", broker.getName());
-    }
-
-    private static File getDataLocation() {
-        File dataLocation;
-        String envData = System.getProperty("NOB_DATA");
-        if (envData == null) {
-            System.getProperty("user.home");
-            dataLocation = new File(new File(System.getProperty("user.home")), ".nob");
-            if (!dataLocation.exists()) {
-                dataLocation = new File(new File("."), ".nob");
-            }
-        } else {
-            dataLocation = new File(envData);
-        }
-        if (!dataLocation.exists()) {
-            dataLocation.mkdirs();
-        };
-
-        if (!dataLocation.isDirectory()) {
-            LOG.error("Cannot create data directory {}", dataLocation.getAbsolutePath());
-            return null;
-        }
-        return dataLocation;
     }
 
     private InputStream makeStringInputStream(String value) {

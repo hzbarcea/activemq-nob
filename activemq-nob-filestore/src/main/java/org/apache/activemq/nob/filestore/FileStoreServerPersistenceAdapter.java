@@ -40,8 +40,8 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
     private BrokerMetadataLoader brokerMetadataLoader;
     private BrokerMetadataWriter brokerMetadataWriter;
 
-    private Map<String, BrokerInformation> brokers = new ConcurrentHashMap<String, BrokerInformation>();
-    private Map<String, String> aliases = new ConcurrentHashMap<String, String>();
+    private Map<String, BrokerInformation> brokers = new ConcurrentHashMap<>();
+    private Map<String, String> aliases = new ConcurrentHashMap<>();
 
     private boolean brokerListLoadedInd = false;
 
@@ -94,7 +94,7 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
     }
 
     @Override
-    public void init() {
+    public void init() throws BrokerConfigException {
         refreshBrokerList();
     }
 

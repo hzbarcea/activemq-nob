@@ -13,13 +13,14 @@ import java.io.InputStream;
  */
 public interface BrokerConfigurationUpdatePersistenceApi {
 
-    void init();
+    void init() throws BrokerConfigException;
 
     /**
      * Create a new broker with the given details in the persistent store.
      *
      * @param newBroker information for the new broker.
      * @param xbeanContent
+     * @throws org.apache.activemq.nob.persistence.api.exception.BrokerConfigPersistenceException
      */
     void createNewBroker(Broker newBroker, InputStream xbeanContent) throws BrokerConfigPersistenceException;
 
@@ -36,6 +37,7 @@ public interface BrokerConfigurationUpdatePersistenceApi {
      *
      * @param brokerId ID of the broker for which to write the configuration.
      * @param xbeanContent source of the configuration of the broker in xbean (XML) format.
+     * @throws org.apache.activemq.nob.persistence.api.exception.BrokerConfigException
      */
     void writeBrokerXbeanConfig(String brokerId, InputStream xbeanContent) throws BrokerConfigException;
 

@@ -16,79 +16,100 @@
     limitations under the License.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>org.apache.activemq.nob</groupId>
-    <artifactId>activemq-nob</artifactId>
-    <version>5.11-SNAPSHOT</version>
-  </parent>
+    <parent>
+        <groupId>org.apache.activemq.nob</groupId>
+        <artifactId>activemq-nob</artifactId>
+        <version>5.11-SNAPSHOT</version>
+    </parent>
 
-  <artifactId>activemq-nob-filestore</artifactId>
-  <packaging>bundle</packaging>
-  <name>ActiveMQ :: NOB :: FileStore Persistence</name>
-  <description>ActiveMQ NOB FileStore Persistence</description>
+    <artifactId>activemq-nob-filestore</artifactId>
+    <packaging>bundle</packaging>
+    <name>ActiveMQ :: NOB :: FileStore Persistence</name>
+    <description>ActiveMQ NOB FileStore Persistence</description>
 
-  <dependencies>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>activemq-nob-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>activemq-nob-persistence-api</artifactId>
-    </dependency>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>activemq-nob-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>activemq-nob-persistence-api</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>${commons.io.version}</version>
-    </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons.io.version}</version>
+        </dependency>
 
-    <!-- logging -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-    </dependency>
+        <!-- logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
 
-    <!-- for testing -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+        <!-- for testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <build>
-      <plugins>
-        <plugin>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>maven-bundle-plugin</artifactId>
-            <extensions>true</extensions>
-            <configuration>
-                <instructions>
-                    <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                    <Bundle-Version>${project.version}</Bundle-Version>
-                    <Export-Package>
-                        org.apache.activemq.nob.filestore*;version=${project.version}
-                    </Export-Package>
-                    <Import-Package>
-                        <!--org.apache.commons.io; version="[1.4,3)",    see https://issues.apache.org/jira/browse/IO-350 -->
-                        *
-                    </Import-Package>
-                </instructions>
-            </configuration>
-        </plugin>
-      </plugins>
-  </build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Export-Package>
+                            org.apache.activemq.nob.filestore*;version=${project.version}
+                        </Export-Package>
+                        <Import-Package>
+                            <!--org.apache.commons.io; version="[1.4,3)",    see https://issues.apache.org/jira/browse/IO-350 -->
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>target/classes/org.apache.activemq.nob.filestore.properties</file>
+                                    <type>cfg</type>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
