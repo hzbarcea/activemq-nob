@@ -47,7 +47,7 @@
         <property name="updatePersistenceApi" ref="persistenceUpdateService" />
     </bean>
 
-    <jaxrs:server id="activemqNobSupervisorService" address="/cc">
+    <jaxrs:server id="activemqNobSupervisorService" address="/nob">
         <jaxrs:serviceBeans>
             <ref component-id="activemqNobSupervisorServiceBean" />
         </jaxrs:serviceBeans>
