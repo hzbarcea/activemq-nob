@@ -4,7 +4,6 @@ package org.apache.activemq.nob.supervisor;
 
 import com.google.common.io.CharStreams;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,18 +13,12 @@ import java.util.List;
 import java.util.UUID;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import org.apache.activemq.nob.ActiveMQNobConstants;
 import org.apache.activemq.nob.api.Broker;
 import org.apache.activemq.nob.api.Brokers;
 import org.apache.activemq.nob.api.Supervisor;
 import org.apache.activemq.nob.deployment.api.BrokerDeploymentApi;
 import org.apache.activemq.nob.deployment.api.exception.BrokerDeploymentException;
-import org.apache.activemq.nob.deployment.sample.log.LoggingDeploymentImplementation;
-import org.apache.activemq.nob.filestore.DefaultFileStorePersistenceAdapter;
 import org.apache.activemq.nob.persistence.api.BrokerConfigurationServerPersistenceApi;
 import org.apache.activemq.nob.persistence.api.BrokerConfigurationUpdatePersistenceApi;
 import org.apache.activemq.nob.persistence.api.XBeanContent;
@@ -73,11 +66,6 @@ public class SupervisorService implements Supervisor {
     }
 
     public void init() throws RuntimeException {
-        if (this.deploymentApi == null) {
-            configureDefaultDeployment();
-        }
-
-        this.deploymentApi.init();
     }
 
     // REST ENDPOINT
@@ -172,10 +160,6 @@ public class SupervisorService implements Supervisor {
         return broker != null ?
             Response.ok().type(MediaType.TEXT_PLAIN).entity(broker.getStatus()).build() :
             Response.status(Response.Status.NOT_FOUND).build();
-    }
-
-    private void configureDefaultDeployment() {
-        deploymentApi = new LoggingDeploymentImplementation();
     }
 
     private Broker createBroker(UUID uuid) {

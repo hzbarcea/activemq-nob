@@ -42,9 +42,13 @@
     <reference id="persistenceUpdateService"
                interface="org.apache.activemq.nob.persistence.api.BrokerConfigurationUpdatePersistenceApi" />
 
+    <reference id="deploymentService"
+               interface="org.apache.activemq.nob.deployment.api.BrokerDeploymentApi" />
+
     <bean id="activemqNobSupervisorServiceBean" class="org.apache.activemq.nob.supervisor.SupervisorService">
         <property name="serverPersistenceApi" ref="persistenceReadService" />
         <property name="updatePersistenceApi" ref="persistenceUpdateService" />
+        <property name="deploymentApi" ref="deploymentService" />
     </bean>
 
     <jaxrs:server id="activemqNobSupervisorService" address="/nob">
