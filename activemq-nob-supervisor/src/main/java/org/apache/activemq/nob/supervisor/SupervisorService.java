@@ -2,7 +2,6 @@
  */
 package org.apache.activemq.nob.supervisor;
 
-import com.google.common.io.CharStreams;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,8 +10,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import org.apache.activemq.nob.ActiveMQNobConstants;
 import org.apache.activemq.nob.api.Broker;
 import org.apache.activemq.nob.api.Brokers;
@@ -26,6 +27,9 @@ import org.apache.activemq.nob.persistence.api.exception.BrokerConfigException;
 import org.apache.activemq.nob.persistence.api.exception.BrokerConfigPersistenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.io.CharStreams;
+
 
 /**
  * JAX-RS ControlCenter root resource
@@ -160,6 +164,24 @@ public class SupervisorService implements Supervisor {
         return broker != null ?
             Response.ok().type(MediaType.TEXT_PLAIN).entity(broker.getStatus()).build() :
             Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    @Override
+    public Response getBrokerConfigXmlFile (String brokerid, String configName) {
+        try {
+            XMLConfigContent configContent = this.serverPersistenceApi.getBrokerXmlConfigFile(brokerid, configName);
+            return (configContent != null) ?
+                    Response.ok()
+                            .type(MediaType.APPLICATION_XML)
+                            .entity(configContent.getContent())
+                            .lastModified(new Date(configContent.getLastModified()))
+                            .build()
+                    :
+                    Response.status(Response.Status.NOT_FOUND).build();
+        } catch ( BrokerConfigPersistenceException exc ) {
+            this.LOG.error("failed to retrieve broker xml config for {}", configName, exc);
+            throw new RuntimeException("failed to retrieve broker xml config for " + configName, exc);
+        }
     }
 
     private Broker createBroker(UUID uuid) {

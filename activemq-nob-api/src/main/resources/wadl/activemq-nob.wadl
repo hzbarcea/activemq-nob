@@ -70,6 +70,17 @@
         <method name="DELETE" id="deleteBroker" />
       </resource>
 
+      <resource path="broker/{brokerid}/{configName}">
+          <param name="brokerid" style="template" type="xs:string"/>
+          <param name="configName" style="template" type="xs:string"/>
+
+          <method name="GET" id="getBrokerConfigXmlFile">
+              <response>
+                  <representation mediaType="application/xml" />
+              </response>
+          </method>
+      </resource>
+
       <resource path="broker/{brokerid}/xbean">
         <param name="brokerid" style="template" type="xs:string"/>
 

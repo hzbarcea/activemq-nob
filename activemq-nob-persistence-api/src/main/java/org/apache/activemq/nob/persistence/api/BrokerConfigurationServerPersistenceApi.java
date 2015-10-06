@@ -40,4 +40,14 @@ public interface BrokerConfigurationServerPersistenceApi {
      * @throws org.apache.activemq.nob.persistence.api.exception.BrokerConfigPersistenceException
      */
     XBeanContent getBrokerXbeanConfiguration(String brokerId) throws BrokerConfigPersistenceException;
+
+    /**
+     * Retrieve an XML configuration file for the broker.
+     *
+     * @param brokerId ID of the broker for which to retrieve the file.
+     * @param configName name of the configuration to retrieve.
+     * @return content of the configuration file.
+     * @throws BrokerConfigPersistenceException
+     */
+    XMLConfigContent getBrokerXmlConfigFile(String brokerId, String configName) throws BrokerConfigPersistenceException;
 }

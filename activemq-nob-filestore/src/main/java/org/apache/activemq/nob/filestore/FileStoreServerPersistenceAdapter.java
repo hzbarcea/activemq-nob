@@ -7,6 +7,7 @@ import org.apache.activemq.nob.filestore.exception.FileStoreWriteBrokerException
 import org.apache.activemq.nob.persistence.api.BrokerConfigurationServerPersistenceApi;
 import org.apache.activemq.nob.persistence.api.BrokerConfigurationUpdatePersistenceApi;
 import org.apache.activemq.nob.persistence.api.XBeanContent;
+import org.apache.activemq.nob.persistence.api.XMLConfigContent;
 import org.apache.activemq.nob.persistence.api.exception.BrokerConfigException;
 import org.apache.activemq.nob.persistence.api.exception.BrokerConfigNotFoundException;
 import org.apache.activemq.nob.persistence.api.exception.BrokerConfigPersistenceException;
@@ -201,6 +202,27 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
                         brokerId, brokerInfo.xbeanPath);
             }
         }
+    }
+
+    @Override
+    public XMLConfigContent getBrokerXmlConfigFile(String brokerId, String configName)
+            throws BrokerConfigPersistenceException {
+
+        BrokerInformation brokerInfo = brokers.get(brokerId);
+
+        XMLConfigContent result = null;
+        if ( brokerInfo != null ) {
+            try {
+                File configFilePath = new File(brokerInfo.metadataPath + "-" + configName + ".xml");
+
+                String content = Files.toString(configFilePath, Charset.forName("UTF-8"));
+                result = new XMLConfigContent(content, configFilePath.lastModified());
+            } catch ( IOException ioExc ) {
+                throw new FileStoreLoadBrokerException("error while loading xbean file for broker", ioExc);
+            }
+        }
+
+        return result;
     }
 
     /**
