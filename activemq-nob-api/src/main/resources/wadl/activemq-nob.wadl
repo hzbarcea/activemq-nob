@@ -120,6 +120,12 @@
       <resource path="broker/{brokerid}/status">
         <param name="brokerid" style="template" type="xs:string"/>
 
+        <method name="PUT" id="setBrokerStatus">
+            <request>
+                <param name="status" style="query" required="true" />
+            </request>
+        </method>
+
         <method name="GET" id="getBrokerStatus">
           <response>
             <representation mediaType="text/plain" />

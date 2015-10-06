@@ -223,6 +223,20 @@ public class SupervisorService implements Supervisor {
     }
 
     // REST ENDPOINT
+    @Override
+    public void setBrokerStatus(String brokerid, String status) {
+        try {
+            Broker broker = this.serverPersistenceApi.lookupBroker(brokerid);
+            broker.setStatus(status);
+            this.updatePersistenceApi.updateBroker(broker);
+        } catch (BrokerConfigException ex) {
+            LOG.warn("failed to update xbean config for broker: brokerId={}", brokerid, ex);
+            throw new RuntimeException("failed to update broker file", ex);
+        }
+    }
+
+    // REST ENDPOINT
+    @Override
     public Response getBrokerStatus(String brokerid) {
         Broker broker = this.serverPersistenceApi.lookupBroker(brokerid);
         return broker != null ?
