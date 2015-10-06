@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.io.CharStreams;
+import org.apache.activemq.nob.persistence.api.XMLConfigContent;
 
 
 /**
