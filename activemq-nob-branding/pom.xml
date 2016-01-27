@@ -4,7 +4,7 @@
     <parent>
         <artifactId>activemq-nob</artifactId>
         <groupId>org.apache.activemq.nob</groupId>
-        <version>5.11-SNAPSHOT</version>
+        <version>5.14.0-SNAPSHOT</version>
     </parent>
 
     <groupId>org.apache.activemq.nob</groupId>

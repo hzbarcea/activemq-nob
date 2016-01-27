@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.apache.activemq.nob</groupId>
         <artifactId>activemq-nob</artifactId>
-        <version>5.11-SNAPSHOT</version>
+        <version>5.14.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>activemq-nob-filestore</artifactId>
