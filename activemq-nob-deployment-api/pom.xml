@@ -10,8 +10,9 @@
 
     <artifactId>activemq-nob-deployment-api</artifactId>
     <packaging>bundle</packaging>
+
     <name>ActiveMQ :: NOB :: Deployment API</name>
-    <description>Please refer to https://github.com/holisticon/activemq-nob-deployment-api.</description>
+    <description>ActiveMQ NOB Deployment API</description>
 
   <dependencies>
     <dependency>

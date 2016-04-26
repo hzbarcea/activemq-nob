@@ -26,10 +26,8 @@
         <version>5.14.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.apache.activemq.nob</groupId>
-    <artifactId>activemq-nob-command</artifactId>
+    <artifactId>activemq-nob-commands</artifactId>
     <packaging>bundle</packaging>
-    <version>5.11-SNAPSHOT</version>
 
     <name>ActiveMQ :: NOB :: Karaf Shell Commands</name>
 

@@ -12,6 +12,7 @@
 
   <artifactId>activemq-nob-supervisor</artifactId>
   <packaging>bundle</packaging>
+
   <name>ActiveMQ :: NOB :: Supervisor</name>
   <description>ActiveMQ Network of Brokers supervisor and configuration server</description>
 

@@ -25,17 +25,24 @@
 
     <feature name='activemq-nob-api' version='${project.version}' description="ActiveMQ NoB Core API">
         <bundle>mvn:org.apache.activemq.nob/activemq-nob-api/${project.version}</bundle>
-        <feature version="${cxf.version}">cxf-jaxrs</feature>
+        <feature>cxf-jaxrs</feature>
+    </feature>
+
+    <feature name="activemq-nob-commands" version="${project.version}" description="ActiveMQ NoB Karaf Shell Commands">
+        <feature dependency="true">shell</feature>
+        <feature>activemq-nob-deployment-api</feature>
+        <feature>activemq-nob-persistence-api</feature>
+        <bundle>mvn:org.apache.activemq.nob/activemq-nob-commands/${project.version}</bundle>
     </feature>
 
     <feature name='activemq-nob-deployment-api' version='${project.version}' description="ActiveMQ NoB Deployment API">
         <bundle>mvn:org.apache.activemq.nob/activemq-nob-deployment-api/${project.version}</bundle>
-        <feature version="${project.version}">activemq-nob-api</feature>
+        <feature>activemq-nob-api</feature>
     </feature>
 
     <feature name='activemq-nob-persistence-api' version='${project.version}' description="ActiveMQ NoB Persistence API">
         <bundle>mvn:org.apache.activemq.nob/activemq-nob-persistence-api/${project.version}</bundle>
-        <feature version="${project.version}">activemq-nob-api</feature>
+        <feature>activemq-nob-api</feature>
     </feature>
 
 
@@ -45,29 +52,29 @@
         <bundle>mvn:org.apache.activemq.nob/activemq-nob-filestore/${project.version}</bundle>
         <bundle dependency="true">mvn:com.google.guava/guava/${guava.version}</bundle>
         <bundle dependency="true">mvn:commons-io/commons-io/${commons.io.version}</bundle>
-        <feature version="${project.version}">activemq-nob-persistence-api</feature>
-        <configfile finalname="/etc/org.apache.activemq.nob.filestore.cfg">mvn:org.apache.activemq.nob/activemq-nob-filestore/${project.version}/cfg</configfile>
+        <feature>activemq-nob-persistence-api</feature>
+        <configfile finalname="${karaf.etc}/org.apache.activemq.nob.filestore.cfg">mvn:org.apache.activemq.nob/activemq-nob-filestore/${project.version}/cfg</configfile>
     </feature>
 
     <feature name='activemq-nob-deployment-sample-log' version='${project.version}' description="ActiveMQ NoB Logger Deployment Service">
         <bundle>mvn:org.apache.activemq.nob/activemq-nob-deployment-sample-log/${project.version}</bundle>
-        <feature version="${project.version}">activemq-nob-deployment-api</feature>
+        <feature>activemq-nob-deployment-api</feature>
     </feature>
 
     <feature name='activemq-nob-supervisor' version='${project.version}' description="ActiveMQ NoB Supervisor REST Service">
         <bundle>mvn:org.apache.activemq.nob/activemq-nob-supervisor/${project.version}</bundle>
-        <feature version="${project.version}">activemq-nob-api</feature>
-        <feature version="${project.version}">activemq-nob-deployment-sample-log</feature>
+        <feature>activemq-nob-api</feature>
+        <feature>activemq-nob-deployment-sample-log</feature>
     </feature>
 
 
     <!-- possible aggregations -->
 
-    <feature name='activemq-nob-supervisor-filestore-brooklyn' version='${project.version}' description="ActiveMQ NoB Supervisor REST Service">
-        <bundle>mvn:org.apache.activemq.nob/activemq-nob-supervisor/${project.version}</bundle>
-        <feature version="${project.version}">activemq-nob-api</feature>
-        <feature version="${project.version}">activemq-nob-filestore</feature>
-        <feature version="${project.version}">activemq-nob-deployment-sample-log</feature>
+    <feature name='activemq-nob-supervisor-filestore-log' version='${project.version}' description="ActiveMQ NoB Supervisor with file store and logging deployment ops">
+        <feature>activemq-nob-supervisor</feature>
+        <feature>activemq-nob-api</feature>
+        <feature>activemq-nob-filestore</feature>
+        <feature>activemq-nob-deployment-sample-log</feature>
     </feature>
 
 </features>

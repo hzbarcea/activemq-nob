@@ -28,7 +28,9 @@
   <groupId>org.apache.activemq.nob</groupId>
   <artifactId>activemq-nob</artifactId>
   <packaging>pom</packaging>
+
   <name>ActiveMQ :: NOB</name>
+  <description>ActiveMQ NOB root project</description>
 
   <properties>
     <commons.io.version>2.4</commons.io.version>
@@ -42,7 +44,7 @@
     <module>activemq-nob-filestore</module>
     <module>activemq-nob-supervisor</module>
     <module>activemq-nob-deployment-api</module>
-    <module>activemq-nob-command</module>
+    <module>activemq-nob-commands</module>
     <module>activemq-nob-branding</module>
     <module>activemq-nob-feature</module>
     <module>activemq-nob-deployment-sample-log</module>

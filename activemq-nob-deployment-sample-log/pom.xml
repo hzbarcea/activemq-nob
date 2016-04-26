@@ -28,6 +28,7 @@
 
     <artifactId>activemq-nob-deployment-sample-log</artifactId>
     <packaging>bundle</packaging>
+
     <name>ActiveMQ :: NOB :: Logging Deployment Sample</name>
     <description>ActiveMQ NOB Deployment Samples</description>
 

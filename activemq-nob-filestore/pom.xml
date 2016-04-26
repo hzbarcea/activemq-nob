@@ -28,6 +28,7 @@
 
     <artifactId>activemq-nob-filestore</artifactId>
     <packaging>bundle</packaging>
+
     <name>ActiveMQ :: NOB :: FileStore Persistence</name>
     <description>ActiveMQ NOB FileStore Persistence</description>
 

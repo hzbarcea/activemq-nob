@@ -28,6 +28,7 @@
 
   <artifactId>activemq-nob-api</artifactId>
   <packaging>bundle</packaging>
+
   <name>ActiveMQ :: NOB :: API</name>
   <description>ActiveMQ NOB service API</description>
 
