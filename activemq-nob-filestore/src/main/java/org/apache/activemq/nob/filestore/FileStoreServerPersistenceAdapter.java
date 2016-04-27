@@ -24,9 +24,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.activemq.nob.api.MapItemType;
 
 /**
  * Created by art on 2/19/15.
@@ -169,6 +168,7 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
             throw new FileStoreWriteBrokerException("failed to write broker xbean to " + brokerInfo.xbeanPath, ioExc);
         }
 
+        newBroker.setLastModifiedXbean(Calendar.getInstance());
         brokers.put(newBroker.getId(), brokerInfo);
     }
 
