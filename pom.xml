@@ -27,7 +27,7 @@
 
   <groupId>org.apache.activemq.nob</groupId>
   <artifactId>activemq-nob</artifactId>
-  <version>5.14.0</version>
+  <version>5.14.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>ActiveMQ :: NOB</name>
@@ -71,7 +71,7 @@
   <scm>
       <connection>scm:git:git@github.com:CMoH/activemq-nob.git</connection>
       <developerConnection>scm:git:git@github.com:CMoH/activemq-nob.git</developerConnection>
-      <tag>activemq-nob-5.14.0</tag>
+      <tag>HEAD</tag>
       <url>https://github.com/CMoH/activemq-nob</url>
   </scm>
 
