@@ -65,7 +65,15 @@
     </dependencies>
   </dependencyManagement>
 
-  <!-- temporarily use apifocal test repository -->
+  <!-- temporarily use apifocal test repository and SCM -->
+
+  <scm>
+      <connection>scm:git:git@github.com:CMoH/activemq-nob.git</connection>
+      <developerConnection>scm:git:git@github.com:CMoH/activemq-nob.git</developerConnection>
+      <tag>HEAD</tag>
+      <url>https://github.com/CMoH/activemq-nob</url>
+  </scm>
+
   <distributionManagement>
     <repository>
       <id>apifocal-public</id>
