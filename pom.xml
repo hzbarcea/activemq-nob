@@ -49,6 +49,8 @@
     <module>activemq-nob-branding</module>
     <module>activemq-nob-feature</module>
     <module>activemq-nob-deployment-sample-log</module>
+    <module>activemq-nob-xbean-gen-api</module>
+    <module>activemq-nob-xbean-gen-template</module>
   </modules>
 
   <dependencyManagement>
