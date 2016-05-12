@@ -29,7 +29,7 @@
     </cm:property-placeholder>-->
 
     <bean id="xbeanGeneratorService" 
-          class="org.apache.activemq.nob.xbean.gen.template.TemplateBrokerXbeanConfigurationGenerator" init-method="init">
+          class="org.apache.activemq.nob.xbean.gen.template.TemplateBrokerXbeanConfigurationGenerator">
     </bean>
 
     <service ref="xbeanGeneratorService" 

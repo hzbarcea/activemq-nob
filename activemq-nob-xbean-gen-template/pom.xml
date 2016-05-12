@@ -52,7 +52,6 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Version>${project.version}</Bundle-Version>
-                        <Bundle-Activator>org.apache.activemq.nob.activemq.nob.xbean.gen.template.Activator</Bundle-Activator>
                         <Export-Package>org.apache.activemq.nob.xbean.gen.template*;version=${project.version}</Export-Package>
                         <Import-Package>*</Import-Package>
                     </instructions>
