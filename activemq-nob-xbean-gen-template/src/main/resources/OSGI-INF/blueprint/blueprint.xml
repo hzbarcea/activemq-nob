@@ -25,11 +25,17 @@
              http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
              ">
 
-<!--    <cm:property-placeholder persistent-id="org.apache.activemq.nob.xbean.gen.template" update-strategy="reload">
-    </cm:property-placeholder>-->
+    <cm:property-placeholder persistent-id="org.apache.activemq.nob.xbean.gen.template" update-strategy="reload">
+        <cm:default-properties>
+            <cm:property name="sourceTemplateFilename" value="activemq.xml.vm"/>
+            <cm:property name="targetConfigFilename" value="activemq.xml"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
 
     <bean id="xbeanGeneratorService" 
           class="org.apache.activemq.nob.xbean.gen.template.TemplateBrokerXbeanConfigurationGenerator">
+        <property name="sourceTemplateFilename" value="${sourceTemplateFilename}" />
+        <property name="targetConfigFilename" value="${targetConfigFilename}" />        
     </bean>
 
     <service ref="xbeanGeneratorService" 

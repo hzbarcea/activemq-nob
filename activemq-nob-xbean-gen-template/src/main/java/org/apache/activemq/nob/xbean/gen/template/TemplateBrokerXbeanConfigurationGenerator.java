@@ -15,15 +15,53 @@
  */
 package org.apache.activemq.nob.xbean.gen.template;
 
+import java.io.FileWriter;
+import java.io.StringWriter;
 import org.apache.activemq.nob.xbean.gen.api.BrokerXbeanConfigurationGeneratorApi;
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.Velocity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * xbean generation via template engine (e.g. Velocity)
  */
 public class TemplateBrokerXbeanConfigurationGenerator implements BrokerXbeanConfigurationGeneratorApi 
 {
+    private static final Logger LOG = LoggerFactory.getLogger(TemplateBrokerXbeanConfigurationGenerator.class);
+    
+    private String sourceTemplateFilename;
+    private String targetConfigFilename;
+    
+    public void setSourceTemplateFilename(String sourceTemplateFilename) {
+        this.sourceTemplateFilename = sourceTemplateFilename;
+    }
+
+    public void setTargetConfigFilename(String targetConfigFilename) {
+        this.targetConfigFilename = targetConfigFilename;
+    }
+    
     @Override
-    public String generateXbeanConfigurationFile() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void generateXbeanConfigurationFile() throws Exception {
+        Velocity.init();
+        
+        //TODO - add variables to be replaced here
+        VelocityContext context = new VelocityContext();
+        //context.put("variable", "value");
+        
+        try {
+            //process input=template
+            Template template = Velocity.getTemplate(sourceTemplateFilename); //
+            StringWriter sw = new StringWriter();
+            template.merge(context, sw);
+            
+            //write output=config
+            FileWriter fw = new FileWriter(targetConfigFilename);
+            fw.write(sw.toString());
+            fw.close();
+        } catch (Exception e) {
+            throw new TemplateBrokerXbeanConfigurationGeneratorException("Error while generating broker config file from template", e);
+        }
     }
 }
