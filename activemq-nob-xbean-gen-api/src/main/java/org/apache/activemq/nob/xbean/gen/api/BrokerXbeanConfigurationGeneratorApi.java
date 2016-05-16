@@ -18,8 +18,8 @@ package org.apache.activemq.nob.xbean.gen.api;
 import java.util.Map;
 
 /**
- * @author chris
+ * generate an activemq configuration file for the broker
  */
 public interface BrokerXbeanConfigurationGeneratorApi {
-    void generateXbeanConfigurationFile(Map<String, String> configProperties) throws Exception;    
+    String generateXbeanConfigurationFile(Map<String, String> configProperties) throws Exception;    
 }

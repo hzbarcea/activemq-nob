@@ -44,7 +44,7 @@ public class TemplateBrokerXbeanConfigurationGenerator implements BrokerXbeanCon
     }
     
     @Override
-    public void generateXbeanConfigurationFile(Map<String, String> configProperties) throws Exception {
+    public String generateXbeanConfigurationFile(Map<String, String> configProperties) throws Exception {
         Velocity.init();
         
         //add variables to be replaced (e.g. brokerName)
@@ -58,11 +58,9 @@ public class TemplateBrokerXbeanConfigurationGenerator implements BrokerXbeanCon
             Template template = Velocity.getTemplate(sourceTemplateFilename);
             StringWriter sw = new StringWriter();
             template.merge(context, sw);
-            
-            //write output=config
-            FileWriter fw = new FileWriter(targetConfigFilename);
-            fw.write(sw.toString());
-            fw.close();
+
+            //return output=config
+            return sw.toString();            
         } catch (Exception e) {
             LOG.error(e.toString());
             throw new TemplateBrokerXbeanConfigurationGeneratorException("Error while generating broker config file from template", e);
