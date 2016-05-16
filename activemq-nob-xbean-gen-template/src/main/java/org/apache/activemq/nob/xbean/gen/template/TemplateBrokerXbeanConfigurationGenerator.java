@@ -17,6 +17,7 @@ package org.apache.activemq.nob.xbean.gen.template;
 
 import java.io.FileWriter;
 import java.io.StringWriter;
+import java.util.Map;
 import org.apache.activemq.nob.xbean.gen.api.BrokerXbeanConfigurationGeneratorApi;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -43,16 +44,18 @@ public class TemplateBrokerXbeanConfigurationGenerator implements BrokerXbeanCon
     }
     
     @Override
-    public void generateXbeanConfigurationFile() throws Exception {
+    public void generateXbeanConfigurationFile(Map<String, String> configProperties) throws Exception {
         Velocity.init();
         
-        //TODO - add variables to be replaced here
+        //add variables to be replaced (e.g. brokerName)
         VelocityContext context = new VelocityContext();
-        //context.put("variable", "value");
+        for (Map.Entry<String, String> entry : configProperties.entrySet()) {
+            context.put(entry.getKey(), entry.getValue());
+        }
         
         try {
             //process input=template
-            Template template = Velocity.getTemplate(sourceTemplateFilename); //
+            Template template = Velocity.getTemplate(sourceTemplateFilename);
             StringWriter sw = new StringWriter();
             template.merge(context, sw);
             
@@ -61,6 +64,7 @@ public class TemplateBrokerXbeanConfigurationGenerator implements BrokerXbeanCon
             fw.write(sw.toString());
             fw.close();
         } catch (Exception e) {
+            LOG.error(e.toString());
             throw new TemplateBrokerXbeanConfigurationGeneratorException("Error while generating broker config file from template", e);
         }
     }
