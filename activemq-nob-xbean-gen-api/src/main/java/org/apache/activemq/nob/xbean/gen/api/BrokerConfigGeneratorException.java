@@ -15,12 +15,20 @@
  */
 package org.apache.activemq.nob.xbean.gen.api;
 
-import java.util.Map;
+public class BrokerConfigGeneratorException extends Exception {
 
-/**
- * Generate ActiveMQ broker configurations.
- */
-public interface BrokerXbeanConfigurationGeneratorApi {
+    public BrokerConfigGeneratorException() {
+    }
 
-    String generateXbeanConfigurationFile(Map<String, String> configProperties) throws BrokerConfigGeneratorException;
+    public BrokerConfigGeneratorException(String msg) {
+        super(msg);
+    }
+
+    public BrokerConfigGeneratorException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
+
+    public BrokerConfigGeneratorException(Throwable cause) {
+        super(cause);
+    }
 }

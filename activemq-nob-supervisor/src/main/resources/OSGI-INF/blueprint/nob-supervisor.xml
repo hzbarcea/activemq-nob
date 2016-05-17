@@ -36,6 +36,10 @@
         </cxf:features>
     </cxf:bus>
 
+
+    <reference id="xbeanGenerator"
+               interface="org.apache.activemq.nob.xbean.gen.api.BrokerXbeanConfigurationGeneratorApi" />
+
     <reference id="persistenceReadService" 
                interface="org.apache.activemq.nob.persistence.api.BrokerConfigurationServerPersistenceApi" />
 
@@ -46,6 +50,7 @@
                interface="org.apache.activemq.nob.deployment.api.BrokerDeploymentApi" />
 
     <bean id="activemqNobSupervisorServiceBean" class="org.apache.activemq.nob.supervisor.SupervisorService">
+        <property name="xbeanGenerator" ref="xbeanGenerator" />
         <property name="serverPersistenceApi" ref="persistenceReadService" />
         <property name="updatePersistenceApi" ref="persistenceUpdateService" />
         <property name="deploymentApi" ref="deploymentService" />

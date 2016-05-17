@@ -18,6 +18,7 @@ package org.apache.activemq.nob.supervisor;
 import java.io.File;
 import javax.ws.rs.core.Response;
 import org.apache.activemq.nob.filestore.DefaultFileStorePersistenceAdapter;
+import org.apache.activemq.nob.xbean.gen.template.TemplateBrokerXbeanConfigurationGenerator;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -44,6 +45,10 @@ public class SupervisorIT {
     @Test
     public void testServiceCreateBroker() throws Exception {
         SupervisorService supervisor = new SupervisorService();
+
+        TemplateBrokerXbeanConfigurationGenerator xbeanGenerator = new TemplateBrokerXbeanConfigurationGenerator();
+        xbeanGenerator.setSourceTemplateFilename("test-template.xml");
+        supervisor.setXbeanGenerator(xbeanGenerator);
 
         DefaultFileStorePersistenceAdapter filestore = new DefaultFileStorePersistenceAdapter(nobData);
         supervisor.setServerPersistenceApi(filestore);

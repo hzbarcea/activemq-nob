@@ -20,22 +20,23 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.5.0"
            xsi:schemaLocation="
              http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
              http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
              ">
 
+    <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]" />
+
     <cm:property-placeholder persistent-id="org.apache.activemq.nob.xbean.gen.template" update-strategy="reload">
         <cm:default-properties>
-            <cm:property name="sourceTemplateFilename" value="activemq.xml.vm"/>
-            <cm:property name="targetConfigFilename" value="activemq.xml"/>
+            <cm:property name="sourceTemplateFilename" value="$[karaf.etc]/activemq-config-template.xml"/>
         </cm:default-properties>
     </cm:property-placeholder>
 
     <bean id="xbeanGeneratorService" 
           class="org.apache.activemq.nob.xbean.gen.template.TemplateBrokerXbeanConfigurationGenerator">
         <property name="sourceTemplateFilename" value="${sourceTemplateFilename}" />
-        <property name="targetConfigFilename" value="${targetConfigFilename}" />        
     </bean>
 
     <service ref="xbeanGeneratorService" 

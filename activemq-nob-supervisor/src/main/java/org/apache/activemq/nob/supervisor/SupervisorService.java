@@ -2,14 +2,13 @@
  */
 package org.apache.activemq.nob.supervisor;
 
-import com.google.common.io.CharStreams;
+import com.google.common.collect.Maps;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -28,6 +27,8 @@ import org.apache.activemq.nob.persistence.api.XBeanContent;
 import org.apache.activemq.nob.persistence.api.XMLConfigContent;
 import org.apache.activemq.nob.persistence.api.exception.BrokerConfigException;
 import org.apache.activemq.nob.persistence.api.exception.BrokerConfigPersistenceException;
+import org.apache.activemq.nob.xbean.gen.api.BrokerConfigGeneratorException;
+import org.apache.activemq.nob.xbean.gen.api.BrokerXbeanConfigurationGeneratorApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 public class SupervisorService implements Supervisor {
     private static final Logger LOG = LoggerFactory.getLogger(SupervisorService.class);
 
+    private BrokerXbeanConfigurationGeneratorApi xbeanGenerator;
     private BrokerConfigurationServerPersistenceApi serverPersistenceApi;
     private BrokerConfigurationUpdatePersistenceApi updatePersistenceApi;
     private BrokerDeploymentApi deploymentApi;
@@ -78,6 +80,14 @@ public class SupervisorService implements Supervisor {
 
     public BrokerDeploymentApi getDeploymentApi() {
         return deploymentApi;
+    }
+
+    public void setXbeanGenerator(BrokerXbeanConfigurationGeneratorApi xbeanGenerator) {
+        this.xbeanGenerator = xbeanGenerator;
+    }
+
+    public BrokerXbeanConfigurationGeneratorApi getXbeanGenerator() {
+        return xbeanGenerator;
     }
 
     public void init() throws RuntimeException {
@@ -137,22 +147,23 @@ public class SupervisorService implements Supervisor {
     }
 
     // REST ENDPOINT
+    @Override
     public Response createBroker() {
         Broker broker = createBroker(UUID.randomUUID());
-        String xbeanContent = generateBrokerXbean(broker);
-
         try {
+            String xbeanContent = generateBrokerXbean(broker);
             InputStream xbeanContentSource = makeStringInputStream(xbeanContent);
             this.updatePersistenceApi.createNewBroker(broker, xbeanContentSource);
-        } catch (BrokerConfigPersistenceException persistenceExc) {
-            this.LOG.error("failed create a new broker", persistenceExc);
-            throw new RuntimeException("failed to persist the broker", persistenceExc);
+        } catch (BrokerConfigGeneratorException | BrokerConfigPersistenceException ex) {
+            this.LOG.error("failed create a new broker", ex);
+            throw new RuntimeException("failed to create a new broker", ex);
         }
 
         return Response.ok().type(MediaType.APPLICATION_XML).entity(broker.getName()).build();
     }
 
     // REST ENDPOINT
+    @Override
     public Brokers getBrokers(String filter) {
         try {
             List<Broker> persistenceBrokerList = this.serverPersistenceApi.retrieveBrokerList();
@@ -174,6 +185,7 @@ public class SupervisorService implements Supervisor {
     }
 
     // REST ENDPOINT
+    @Override
     public void updateBroker(String brokerid, Broker brokertype) {
         try {
             this.updatePersistenceApi.updateBroker(brokertype);
@@ -184,6 +196,7 @@ public class SupervisorService implements Supervisor {
     }
 
     // REST ENDPOINT
+    @Override
     public void deleteBroker(String brokerid) {
         try {
             this.updatePersistenceApi.removeBroker(brokerid);
@@ -194,6 +207,7 @@ public class SupervisorService implements Supervisor {
     }
 
     // REST ENDPOINT
+    @Override
     public Response getBrokerXbeanConfig(String brokerid) {
         try {
             XBeanContent xBeanContent = this.serverPersistenceApi.getBrokerXbeanConfiguration(brokerid);
@@ -274,9 +288,10 @@ public class SupervisorService implements Supervisor {
         return broker;
     }
 
-    private String generateBrokerXbean(Broker broker) {
-        String xbean = getXbeanConfigurationTemplate();
-        return xbean.replaceAll("\\$brokerName", broker.getName());
+    private String generateBrokerXbean(Broker broker) throws BrokerConfigGeneratorException {
+        Map<String, String> configProperties = Maps.newHashMap();
+        configProperties.put("brokerName", broker.getName());
+        return xbeanGenerator.generateXbeanConfigurationFile(configProperties);
     }
 
     private InputStream makeStringInputStream(String value) {
@@ -287,17 +302,6 @@ public class SupervisorService implements Supervisor {
             LOG.error("UTF-8 unsupported");
             throw new RuntimeException("UTF-8 unsupported");
         }
-    }
-
-    public static final String getXbeanConfigurationTemplate() {
-        try (
-                final InputStream xbean = SupervisorService.class.getResourceAsStream("/META-INF/activemq-default.xml");
-                final InputStreamReader in = new InputStreamReader(xbean)) {
-            return CharStreams.toString(in);
-        } catch (IOException e) {
-            LOG.error("Could not read the default xbean configuration template", e);
-        }
-        return null;
     }
 
     @Override

@@ -20,14 +20,17 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.5.0"
            xsi:schemaLocation="
              http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
-             http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
+             http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
              ">
+
+    <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]" />
 
     <cm:property-placeholder persistent-id="org.apache.activemq.nob.filestore" update-strategy="reload">
         <cm:default-properties>
-            <cm:property name="location" value="${karaf.data}/nob"/>
+            <cm:property name="location" value="$[karaf.data]/nob" />
         </cm:default-properties>
     </cm:property-placeholder>
 
@@ -37,10 +40,11 @@
         <property name="location" value="${location}" />
     </bean>
 
-    <service ref="filePersistenceService"
-             interface="org.apache.activemq.nob.persistence.api.BrokerConfigurationServerPersistenceApi" />
-
-    <service ref="filePersistenceService"
-             interface="org.apache.activemq.nob.persistence.api.BrokerConfigurationUpdatePersistenceApi" />
+    <service ref="filePersistenceService">
+        <interfaces>
+            <value>org.apache.activemq.nob.persistence.api.BrokerConfigurationServerPersistenceApi</value>
+            <value>org.apache.activemq.nob.persistence.api.BrokerConfigurationUpdatePersistenceApi</value>
+        </interfaces>
+    </service>
 
 </blueprint>

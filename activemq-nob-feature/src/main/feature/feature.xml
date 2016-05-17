@@ -28,6 +28,10 @@
         <feature>cxf-jaxrs</feature>
     </feature>
 
+    <feature name='activemq-nob-xbean-gen-api' version='${project.version}' description="ActiveMQ NoB XBean Generator API">
+        <bundle>mvn:org.apache.activemq.nob/activemq-nob-xbean-gen-api/${project.version}</bundle>
+    </feature>
+
     <feature name="activemq-nob-commands" version="${project.version}" description="ActiveMQ NoB Karaf Shell Commands">
         <feature dependency="true">shell</feature>
         <feature>activemq-nob-deployment-api</feature>
@@ -56,6 +60,16 @@
         <configfile finalname="${karaf.etc}/org.apache.activemq.nob.filestore.cfg">mvn:org.apache.activemq.nob/activemq-nob-filestore/${project.version}/cfg</configfile>
     </feature>
 
+    <feature name='activemq-nob-xbean-gen-velocity' version='${project.version}' description="ActiveMQ NoB XBean Generator using Velocity">
+        <bundle dependency="true">mvn:org.apache.velocity/velocity/${velocity-version}</bundle>
+        <bundle dependency="true">mvn:commons-collections/commons-collections/${commons-collections-version}</bundle>
+        <bundle dependency="true">mvn:commons-lang/commons-lang/${commons-lang-version}</bundle>
+        <bundle>mvn:org.apache.activemq.nob/activemq-nob-xbean-gen-template/${project.version}</bundle>
+        <feature>activemq-nob-xbean-gen-api</feature>
+        <configfile finalname="${karaf.etc}/org.apache.activemq.nob.xbean.gen.template.cfg">mvn:org.apache.activemq.nob/activemq-nob-xbean-gen-template/${project.version}/cfg</configfile>
+        <configfile finalname="${karaf.etc}/activemq-config-template.xml">mvn:org.apache.activemq.nob/activemq-nob-xbean-gen-template/${project.version}/xml/activemq-config-template</configfile>
+    </feature>
+
     <feature name='activemq-nob-deployment-sample-log' version='${project.version}' description="ActiveMQ NoB Logger Deployment Service">
         <bundle>mvn:org.apache.activemq.nob/activemq-nob-deployment-sample-log/${project.version}</bundle>
         <feature>activemq-nob-deployment-api</feature>
@@ -64,7 +78,8 @@
     <feature name='activemq-nob-supervisor' version='${project.version}' description="ActiveMQ NoB Supervisor REST Service">
         <bundle>mvn:org.apache.activemq.nob/activemq-nob-supervisor/${project.version}</bundle>
         <feature>activemq-nob-api</feature>
-        <feature>activemq-nob-deployment-sample-log</feature>
+        <feature>activemq-nob-xbean-gen-api</feature>
+        <bundle dependency="true">mvn:commons-io/commons-io/${commons.io.version}</bundle>
     </feature>
 
 
@@ -72,7 +87,7 @@
 
     <feature name='activemq-nob-supervisor-filestore-log' version='${project.version}' description="ActiveMQ NoB Supervisor with file store and logging deployment ops">
         <feature>activemq-nob-supervisor</feature>
-        <feature>activemq-nob-api</feature>
+        <feature>activemq-nob-xbean-gen-velocity</feature>
         <feature>activemq-nob-filestore</feature>
         <feature>activemq-nob-deployment-sample-log</feature>
     </feature>

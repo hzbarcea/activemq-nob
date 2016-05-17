@@ -61,8 +61,18 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.apache.activemq.nob</groupId>
+        <artifactId>activemq-nob-xbean-gen-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>activemq-nob-persistence-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.activemq.nob</groupId>
+        <artifactId>activemq-nob-deployment-api</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

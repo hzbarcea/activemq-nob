@@ -15,10 +15,12 @@
  */
 package org.apache.activemq.nob.xbean.gen.template;
 
+import org.apache.activemq.nob.xbean.gen.api.BrokerConfigGeneratorException;
+
 /**
  * exception while generating config
  */
-public class TemplateBrokerXbeanConfigurationGeneratorException extends Exception {
+public class TemplateBrokerXbeanConfigurationGeneratorException extends BrokerConfigGeneratorException {
     public TemplateBrokerXbeanConfigurationGeneratorException() {
     }
 
