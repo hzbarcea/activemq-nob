@@ -13,13 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.activemq.nob.xbean.gen.api;
-
-import java.util.Map;
+package org.apache.activemq.nob.xbean.gen.template;
 
 /**
- * generate an activemq configuration file for the broker
+ * exception while generating config
  */
-public interface BrokerXbeanConfigurationGeneratorApi {
-    String generateXbeanConfigurationFile(Map<String, String> configProperties) throws Exception;    
+public class TemplateBrokerXbeanConfigurationGeneratorException extends Exception {
+    public TemplateBrokerXbeanConfigurationGeneratorException() {
+    }
+
+    public TemplateBrokerXbeanConfigurationGeneratorException(String message) {
+        super(message);
+    }
+
+    public TemplateBrokerXbeanConfigurationGeneratorException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public TemplateBrokerXbeanConfigurationGeneratorException(Throwable cause) {
+        super(cause);
+    }    
 }
