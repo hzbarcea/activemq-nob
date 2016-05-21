@@ -15,25 +15,27 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.activemq</groupId>
     <artifactId>activemq-parent</artifactId>
-    <version>5.11-SNAPSHOT</version>
+    <version>5.13.2</version>
   </parent>
 
   <groupId>org.apache.activemq.nob</groupId>
   <artifactId>activemq-nob</artifactId>
+  <version>5.14.1-SNAPSHOT</version>
   <packaging>pom</packaging>
+
   <name>ActiveMQ :: NOB</name>
+  <description>ActiveMQ NOB root project</description>
 
   <properties>
     <commons.io.version>2.4</commons.io.version>
-    <cxf.version>3.0.1</cxf.version>
+    <cxf.version>3.1.0</cxf.version>
     <guava.version>18.0</guava.version>
   </properties>
 
@@ -42,6 +44,13 @@
     <module>activemq-nob-persistence-api</module>
     <module>activemq-nob-filestore</module>
     <module>activemq-nob-supervisor</module>
+    <module>activemq-nob-deployment-api</module>
+    <module>activemq-nob-commands</module>
+    <module>activemq-nob-branding</module>
+    <module>activemq-nob-feature</module>
+    <module>activemq-nob-deployment-sample-log</module>
+    <module>activemq-nob-xbean-gen-api</module>
+    <module>activemq-nob-xbean-gen-template</module>
   </modules>
 
   <dependencyManagement>
@@ -52,11 +61,41 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.apache.activemq.nob</groupId>
+        <artifactId>activemq-nob-xbean-gen-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>activemq-nob-persistence-api</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.activemq.nob</groupId>
+        <artifactId>activemq-nob-deployment-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
-</project>
 
+  <!-- temporarily use apifocal test repository and SCM -->
+
+  <scm>
+      <connection>scm:git:git@github.com:CMoH/activemq-nob.git</connection>
+      <developerConnection>scm:git:git@github.com:CMoH/activemq-nob.git</developerConnection>
+      <tag>HEAD</tag>
+      <url>https://github.com/CMoH/activemq-nob</url>
+  </scm>
+
+  <distributionManagement>
+    <repository>
+      <id>apifocal-public</id>
+      <url>http://dev.cheepee.ro/archiva/repository/apifocal-public</url>
+    </repository>
+    <snapshotRepository>
+      <id>apifocal-public</id>
+      <url>http://dev.cheepee.ro/archiva/repository/apifocal-public</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+</project>

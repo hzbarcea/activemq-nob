@@ -15,6 +15,7 @@ import java.util.UUID;
  */
 public class UUIDDirectoryStoreFilenameDecoder implements BrokerFilenameDecoder {
     public static final String  XBEAN_FILE_PATH_SUFFIX = "-xbean.xml";
+    public static final String  PROPERTIES_FILE_PATH_SUFFIX = ".properties";
 
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(UUIDDirectoryStoreFilenameDecoder.class);
 
@@ -61,6 +62,19 @@ public class UUIDDirectoryStoreFilenameDecoder implements BrokerFilenameDecoder 
 
         if ( brokerId != null ) {
             result = new File(brokerPath.getPath() + XBEAN_FILE_PATH_SUFFIX);
+        }
+
+        return result;
+    }
+    
+        @Override
+    public File getBrokerPropertiesFile(File brokerPath) {
+        File result = null;
+
+        String brokerId = this.extractIdFromFilename(brokerPath);
+
+        if ( brokerId != null ) {
+            result = new File(brokerPath.getPath() + PROPERTIES_FILE_PATH_SUFFIX);
         }
 
         return result;

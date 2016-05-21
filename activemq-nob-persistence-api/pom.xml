@@ -15,19 +15,19 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.activemq.nob</groupId>
     <artifactId>activemq-nob</artifactId>
-    <version>5.11-SNAPSHOT</version>
+    <version>5.14.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>activemq-nob-persistence-api</artifactId>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
+
   <name>ActiveMQ :: NOB :: Persistence API</name>
   <description>ActiveMQ NOB Persistence API</description>
 
@@ -69,4 +69,26 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+    <build>
+      <plugins>
+        <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <extensions>true</extensions>
+            <configuration>
+                <instructions>
+                    <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                    <Bundle-Version>${project.version}</Bundle-Version>
+                    <Export-Package>
+                        org.apache.activemq.nob.persistence.api*;version=${project.version}
+                    </Export-Package>
+                    <Import-Package>
+                        *
+                    </Import-Package>
+                </instructions>
+            </configuration>
+        </plugin>
+      </plugins>
+  </build>
 </project>

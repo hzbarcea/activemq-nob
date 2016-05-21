@@ -1,6 +1,7 @@
 package org.apache.activemq.nob.filestore;
 
 import com.google.common.io.Files;
+import java.io.ByteArrayInputStream;
 import org.apache.activemq.nob.api.Broker;
 import org.apache.activemq.nob.filestore.exception.FileStoreLoadBrokerException;
 import org.apache.activemq.nob.filestore.exception.FileStoreWriteBrokerException;
@@ -17,23 +18,30 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.Calendar;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by art on 2/19/15.
  */
 public class FileStoreServerPersistenceAdapter implements BrokerConfigurationServerPersistenceApi, BrokerConfigurationUpdatePersistenceApi {
+
     private static final Logger DEFAULT_LOGGER = LoggerFactory.getLogger(FileStoreServerPersistenceAdapter.class);
     private Logger LOG = DEFAULT_LOGGER;
-
 
     private File location;
     private BrokerFilenameDecoder brokerFilenameDecoder;
@@ -41,8 +49,8 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
     private BrokerMetadataLoader brokerMetadataLoader;
     private BrokerMetadataWriter brokerMetadataWriter;
 
-    private Map<String, BrokerInformation> brokers = new ConcurrentHashMap<String, BrokerInformation>();
-    private Map<String, String> aliases = new ConcurrentHashMap<String, String>();
+    private Map<String, BrokerInformation> brokers = new ConcurrentHashMap<>();
+    private Map<String, String> aliases = new ConcurrentHashMap<>();
 
     private boolean brokerListLoadedInd = false;
 
@@ -95,19 +103,19 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
     }
 
     @Override
-    public void init() {
+    public void init() throws BrokerConfigException {
         refreshBrokerList();
     }
 
     @Override
     public List<Broker> retrieveBrokerList() throws BrokerConfigPersistenceException {
-        if ( ! brokerListLoadedInd) {
+        if (!brokerListLoadedInd) {
             refreshBrokerList();
             brokerListLoadedInd = true;
         }
 
         List<Broker> result = new LinkedList<>();
-        for ( BrokerInformation oneBrokerInfo : brokers.values() ) {
+        for (BrokerInformation oneBrokerInfo : brokers.values()) {
             result.add(oneBrokerInfo.metadata);
         }
 
@@ -119,23 +127,23 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
         BrokerInformation brokerInfo = this.brokers.get(brokerId);
 
         Broker result = null;
-        if ( brokerInfo != null ) {
+        if (brokerInfo != null) {
             result = brokerInfo.metadata;
         }
 
-        return  result;
+        return result;
     }
 
     @Override
     public XBeanContent getBrokerXbeanConfiguration(String brokerId) throws BrokerConfigPersistenceException {
         BrokerInformation brokerInfo = brokers.get(brokerId);
 
-        XBeanContent result =  null;
-        if ( brokerInfo != null ) {
+        XBeanContent result = null;
+        if (brokerInfo != null) {
             try {
                 String content = Files.toString(brokerInfo.xbeanPath, Charset.forName("UTF-8"));
                 result = new XBeanContent(content, brokerInfo.xbeanPath.lastModified());
-            } catch ( IOException ioExc ) {
+            } catch (IOException ioExc) {
                 throw new FileStoreLoadBrokerException("error while loading xbean file for broker", ioExc);
             }
         }
@@ -150,6 +158,7 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
         brokerInfo.metadata = newBroker;
 
         brokerInfo.metadataPath = this.brokerFilenameEncoder.locateBrokerMetadataFilePath(newBroker.getId());
+        brokerInfo.propertiesPath = this.brokerFilenameEncoder.locateBrokerPropertiesFilePath(newBroker.getId());
         brokerInfo.xbeanPath = this.brokerFilenameEncoder.locateBrokerXbeanFilePath(newBroker.getId());
 
         this.brokerMetadataWriter.writeBrokerMetadata(brokerInfo.metadataPath, newBroker);
@@ -159,6 +168,7 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
             throw new FileStoreWriteBrokerException("failed to write broker xbean to " + brokerInfo.xbeanPath, ioExc);
         }
 
+        newBroker.setLastModifiedXbean(Calendar.getInstance());
         brokers.put(newBroker.getId(), brokerInfo);
     }
 
@@ -169,13 +179,14 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
             throw new BrokerConfigNotFoundException("no broker " + updateBroker.getId());
         }
         this.brokerMetadataWriter.writeBrokerMetadata(brokerInfo.metadataPath, updateBroker);
+        brokerInfo.metadata = updateBroker;
     }
 
     @Override
     public void writeBrokerXbeanConfig(String brokerId, InputStream xbeanConfigSource) throws BrokerConfigException {
 
         BrokerInformation brokerInfo = this.brokers.get(brokerId);
-        if ( brokerInfo != null ) {
+        if (brokerInfo != null) {
             try {
                 this.writeBrokerXbean(xbeanConfigSource, brokerInfo.xbeanPath);
             } catch (IOException ioExc) {
@@ -190,15 +201,20 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
     public void removeBroker(String brokerId) throws BrokerConfigPersistenceException {
         BrokerInformation brokerInfo = this.brokers.remove(brokerId);
 
-        if ( brokerInfo != null ) {
-            if ( ! brokerInfo.metadataPath.delete() ) {
+        if (brokerInfo != null) {
+            if (!brokerInfo.metadataPath.delete()) {
                 this.LOG.warn("failed to remove broker metadata file on removal: brokerId={}; path={}",
                         brokerId, brokerInfo.metadataPath);
             }
 
-            if ( ! brokerInfo.xbeanPath.delete() ) {
+            if (!brokerInfo.xbeanPath.delete()) {
                 this.LOG.warn("failed to remove broker xbean file on removal: brokerId={}; path={}",
                         brokerId, brokerInfo.xbeanPath);
+            }
+
+            if (!brokerInfo.propertiesPath.delete()) {
+                this.LOG.warn("failed to remove broker properties file on removal: brokerId={}; path={}",
+                        brokerId, brokerInfo.propertiesPath);
             }
         }
     }
@@ -239,17 +255,17 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
                 // Only accept if both configuration and metadata files are present
                 // This may still be insufficient, as metadata could be incorrect
 
-                return ( ! file.isDirectory() )
-                        &&  ( brokerFilenameDecoder.extractIdFromFilename(file) != null )
-                        &&  ( brokerFilenameDecoder.getBrokerXbeanFile(file) != null );
+                return (!file.isDirectory())
+                        && (brokerFilenameDecoder.extractIdFromFilename(file) != null)
+                        && (brokerFilenameDecoder.getBrokerXbeanFile(file) != null);
             }
         });
 
-         // Load all of the broker definitions from the matching files now.
+        // Load all of the broker definitions from the matching files now.
         for (File def : brokerDefinitions) {
             Broker broker = this.loadBroker(newBrokerMap, newAliasMap, def);
 
-            if ( broker != null ) {
+            if (broker != null) {
                 newBrokerMetadataPathsMap.put(broker.getId(), def);
             }
         }
@@ -263,10 +279,11 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
      *
      * @param metadataPath path to the broker's metadata file.
      */
-    private Broker loadBroker (Map<String, BrokerInformation> brokerMap, Map<String, String> aliasMap,
-                               File metadataPath) {
+    private Broker loadBroker(Map<String, BrokerInformation> brokerMap, Map<String, String> aliasMap,
+            File metadataPath) {
 
         File xbeanPath = brokerFilenameDecoder.getBrokerXbeanFile(metadataPath);
+        File propertiesPath = brokerFilenameDecoder.getBrokerPropertiesFile(metadataPath);
 
         Broker broker = this.brokerMetadataLoader.loadMetadata(metadataPath, xbeanPath);
         if (broker != null) {
@@ -276,6 +293,7 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
             newBrokerInfo.metadata = broker;
             newBrokerInfo.metadataPath = metadataPath;
             newBrokerInfo.xbeanPath = xbeanPath;
+            newBrokerInfo.propertiesPath = propertiesPath;
 
             BrokerInformation old = brokerMap.put(id, newBrokerInfo);
 
@@ -289,23 +307,128 @@ public class FileStoreServerPersistenceAdapter implements BrokerConfigurationSer
                 LOG.warn("NOB - broker {} already exists. Data may be corrupted.");
             }
 
-            return  broker;
+            return broker;
         } else {
             LOG.warn("Broker definition parse error ({}). Ignoring...", metadataPath.getName());
         }
 
-        return  null;
+        return null;
     }
 
-    protected void writeBrokerXbean (InputStream source, File xbeanPath) throws IOException {
-        try ( FileOutputStream outputStream = new FileOutputStream(xbeanPath) ) {
+    protected void writeBrokerXbean(InputStream source, File xbeanPath) throws IOException {
+        try (FileOutputStream outputStream = new FileOutputStream(xbeanPath)) {
             IOUtils.copy(source, outputStream);
         }
     }
 
+    @Override
+    public List<String> listProperties(String brokerId) throws BrokerConfigNotFoundException, FileStoreLoadBrokerException {
+        BrokerInformation brokerInfo = this.brokers.get(brokerId);
+        if (brokerInfo == null) {
+            throw new BrokerConfigNotFoundException("no broker with id " + brokerId);
+        }
+        List<String> result = new LinkedList<>();
+        Properties props = loadBrokerProperties(brokerInfo);
+        if (props == null) {
+            return result; // empty property list
+        }
+        for (Enumeration<?> e = props.propertyNames(); e.hasMoreElements();) {
+            String key = (String) e.nextElement();
+            result.add(key);
+        }
+        return result;
+    }
+
+    @Override
+    public InputStream getProperty(String brokerId, String key) throws BrokerConfigNotFoundException, FileStoreLoadBrokerException {
+        BrokerInformation brokerInfo = this.brokers.get(brokerId);
+        if (brokerInfo == null) {
+            throw new BrokerConfigNotFoundException("no broker with id " + brokerId);
+        }
+
+        Properties props = loadBrokerProperties(brokerInfo);
+        if (props == null) {
+            return null; // empty property list
+        }
+
+        try {
+            String value = props.getProperty(key);
+            return value == null ? null : new ByteArrayInputStream(value.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException ex) {
+            LOG.error("UTF-8 unsupported");
+            throw new RuntimeException("UTF-8 unsupported");
+        }
+    }
+
+    @Override
+    public void setProperty(String brokerId, String key, InputStream content) throws BrokerConfigNotFoundException, FileStoreLoadBrokerException, FileStoreWriteBrokerException {
+        BrokerInformation brokerInfo = this.brokers.get(brokerId);
+        if (brokerInfo == null) {
+            throw new BrokerConfigNotFoundException("no broker with id " + brokerId);
+        }
+
+        Properties props = loadBrokerProperties(brokerInfo);
+        if (props == null) {
+            props = new Properties();
+        }
+
+        String value;
+        try {
+            value = IOUtils.toString(content, "UTF-8");
+            props.setProperty(key, value);
+            storeBrokerProperties(brokerInfo, props);
+        } catch (IOException ex) {
+            LOG.error("UTF-8 unsupported");
+            throw new RuntimeException("UTF-8 unsupported");
+        }
+    }
+
+    @Override
+    public void unsetProperty(String brokerId, String key) throws BrokerConfigNotFoundException, FileStoreLoadBrokerException, FileStoreWriteBrokerException {
+        BrokerInformation brokerInfo = this.brokers.get(brokerId);
+        if (brokerInfo == null) {
+            throw new BrokerConfigNotFoundException("no broker with id " + brokerId);
+        }
+
+        Properties props = loadBrokerProperties(brokerInfo);
+        if (props == null) {
+            return;
+        }
+
+        props.remove(key);
+        storeBrokerProperties(brokerInfo, props);
+    }
+
+    private Properties loadBrokerProperties(BrokerInformation info) throws FileStoreLoadBrokerException {
+        Properties p = new Properties();
+
+        try {
+            InputStream in = new FileInputStream(info.propertiesPath);
+            p.load(in);
+        } catch (FileNotFoundException e) {
+            // not found = no properties
+        } catch (IOException e) {
+            throw new FileStoreLoadBrokerException(e);
+        }
+
+        return p;
+    }
+
+    private void storeBrokerProperties(BrokerInformation info, Properties props) throws FileStoreWriteBrokerException {
+        try {
+            OutputStream out = new FileOutputStream(info.propertiesPath);
+            props.store(out, "# Broker definition for " + info.metadata.getId());
+        } catch (IOException e) {
+            LOG.error("Failed to store broker properties for '{}': {}", info.metadata.getId(), e.getMessage());
+            throw new FileStoreWriteBrokerException("Failed to store broker properties", e);
+        }
+    }
+
     protected class BrokerInformation {
+
         public Broker metadata;
         public File metadataPath;
+        public File propertiesPath;
         public File xbeanPath;
     }
 }

@@ -1,17 +1,17 @@
 <!-- Copyright (C) 2010 Talend Inc. - www.talend.com -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.activemq.nob</groupId>
     <artifactId>activemq-nob</artifactId>
-    <version>5.11-SNAPSHOT</version>
+    <version>5.14.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>activemq-nob-supervisor</artifactId>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
+
   <name>ActiveMQ :: NOB :: Supervisor</name>
   <description>ActiveMQ Network of Brokers supervisor and configuration server</description>
 
@@ -19,17 +19,18 @@
     <dependency>
       <groupId>org.apache.activemq.nob</groupId>
       <artifactId>activemq-nob-api</artifactId>
-      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.activemq.nob</groupId>
+        <artifactId>activemq-nob-xbean-gen-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.activemq.nob</groupId>
       <artifactId>activemq-nob-persistence-api</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.activemq.nob</groupId>
-      <artifactId>activemq-nob-filestore</artifactId>
-      <version>${project.version}</version>
+      <artifactId>activemq-nob-deployment-api</artifactId>
     </dependency>
 
     <dependency>
@@ -45,7 +46,6 @@
     <dependency>
       <groupId>org.codehaus.jettison</groupId>
       <artifactId>jettison</artifactId>
-      <version>1.3.1</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -94,17 +94,65 @@
       <artifactId>spring-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.activemq.nob</groupId>
+      <artifactId>activemq-nob-filestore</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.activemq.nob</groupId>
+      <artifactId>activemq-nob-xbean-gen-template</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <argLine>-DNOB_DATA=${project.build.directory}/nob/</argLine>
-        </configuration>
-      </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+                <systemPropertyVariables>
+                    <NOB_DATA>${project.build.directory}/nob/</NOB_DATA>
+                </systemPropertyVariables>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+                <systemPropertyVariables>
+                    <NOB_DATA>${project.build.directory}/nob/</NOB_DATA>
+                </systemPropertyVariables>
+            </configuration>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>integration-test</goal>
+                        <goal>verify</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>maven-bundle-plugin</artifactId>
+            <extensions>true</extensions>
+            <configuration>
+                <instructions>
+                    <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                    <Bundle-Version>${project.version}</Bundle-Version>
+                    <Export-Package>
+                        org.apache.activemq.nob.supervisor*;version=${project.version}
+                    </Export-Package>
+                    <Import-Package>
+                        *
+                    </Import-Package>
+                </instructions>
+            </configuration>
+        </plugin>
     </plugins>
   </build>
 

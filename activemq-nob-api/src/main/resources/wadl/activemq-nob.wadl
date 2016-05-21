@@ -98,9 +98,33 @@
           </request>
         </method>
       </resource>
+      
+      <resource path="broker/{brokerid}/deploy">
+        <param name="brokerid" style="template" type="xs:string"/>
+        <method name="POST" id="deployBroker">
+            <response>
+                <representation mediaType="*" />
+            </response>
+        </method>
+      </resource>
+      
+      <resource path="broker/{brokerid}/undeploy">
+        <param name="brokerid" style="template" type="xs:string"/>
+        <method name="POST" id="undeployBroker">
+            <response>
+                <representation mediaType="*" />
+            </response>
+        </method>
+      </resource>
 
       <resource path="broker/{brokerid}/status">
         <param name="brokerid" style="template" type="xs:string"/>
+
+        <method name="PUT" id="setBrokerStatus">
+            <request>
+                <param name="status" style="query" required="true" />
+            </request>
+        </method>
 
         <method name="GET" id="getBrokerStatus">
           <response>
@@ -109,7 +133,41 @@
         </method>
       </resource>
 
+      <resource path="broker/{brokerid}/properties">
+        <param name="brokerid" style="template" type="xs:string"/>
+        
+        <method name="GET" id="listProperties">
+            <response>
+                <representation mediaType="application/*+json" element="nob:propertyKeyList" />
+                <representation mediaType="application/json" element="nob:propertyKeyList" />
+                <representation mediaType="application/xml" element="nob:propertyKeyList" />
+            </response>
+        </method>
+      </resource>
+    
+      <resource path="broker/{brokerid}/property/{key}">
+        <param name="brokerid" style="template" type="xs:string"/>
+        <param name="key" style="template" type="xs:string"/>
+        
+        <method name="GET" id="getProperty">
+            <response>
+                <representation mediaType="text/plain" />
+            </response>
+        </method>
+        
+        <method name="PUT" id="setProperty">
+            <request>
+                <representation mediaType="text/plain">
+                    <param name="value" style="plain" type="xs:string" />
+                </representation>
+            </request>
+        </method>
+        
+        <method name="DELETE" id="unsetProperty" />
+      </resource>
+
     </resource>
+
   </resources>
 </application>
 
